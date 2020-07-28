@@ -259,15 +259,16 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	}
 
 	/**
-	 * Resolve the specified bean name, as a candidate result of the matching
-	 * algorithm for this dependency, to a bean instance from the given factory.
-	 * <p>The default implementation calls {@link BeanFactory#getBean(String)}.
-	 * Subclasses may provide additional arguments or other customizations.
-	 * @param beanName the bean name, as a candidate result for this dependency
-	 * @param requiredType the expected type of the bean (as an assertion)
-	 * @param beanFactory the associated factory
-	 * @return the bean instance (never {@code null})
-	 * @throws BeansException if the bean could not be obtained
+	 * 这个方法目的是获取被注入的bean 直接去容器获取，没有的话需要走那个逻辑
+	 * 解析指定的bean名称，作为匹配的候选结果
+	 * 依赖关系的算法，该算法依赖于给定工厂的bean实例。
+	 * <p>默认实现调用 {@link BeanFactory#getBean(String)}.
+	 * 子类可以提供其他参数或其他自定义项。
+	 * @param beanName Bean名称，作为此依赖项的候选结果
+	 * @param requiredType bean的预期类型（作为断言）
+	 * @param beanFactory 相关工厂
+	 * @return bean实例(never {@code null})
+	 * @throws BeansException 如果无法获得bean
 	 * @since 4.3.2
 	 * @see BeanFactory#getBean(String)
 	 */

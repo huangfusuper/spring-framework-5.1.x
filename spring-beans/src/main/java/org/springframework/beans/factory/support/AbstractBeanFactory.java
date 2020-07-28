@@ -246,6 +246,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		//检查一级缓存内是否有该单例bean的对象
 		//当一级缓存没有 而却当前的bean为创建中的状态时（实例化完成但是没有初始化），检查二级缓存对象，有就返回
 		//当二级缓存没有 检查三级缓存，调用三级缓存的匿名内部类的回调方法获取bean对象，放置到二级缓存，删除三级缓存的该数据  返回当前bean
+		//从三级缓存取的原因是因为如果该类为依赖类，并且被设置了代理，则再该方法内部获取的就是代理对象，保证注入时，第一次获取的就是一个代理对象
+		//事实上 如果是循环引用，被引用对象再注入属性时三级缓存已经存在，就会使用三级缓存的工厂对象，返回该bean该做代理的时候做代理，没代理的话直接返回
 		Object sharedInstance = getSingleton(beanName);
 		//当发生循环依赖时，第一次查询该对象返回的数据一定为null
 		if (sharedInstance != null && args == null) {
@@ -258,6 +260,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			//获取Bean实例的对象
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		} else {
 			// 如果我们已经在创建此bean实例，则失败：
@@ -314,7 +317,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					}
 				}
 
-				// 创建bean实例。 这个是个真正的创建bean实例的方法   因为Spring只有单例bean在创建时才会初始化 ，所以吗，我们需要判断当前这个bean是不是单例的bean
+				// 创建bean实例。 这个是个真正的创建bean实例的方法   单例池获取，没有的话就将该bean加入到正在创建  然后走创建bean的回调
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
@@ -322,9 +325,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
-							// Explicitly remove instance from singleton cache: It might have been put there
-							// eagerly by the creation process, to allow for circular reference resolution.
-							// Also remove any beans that received a temporary reference to the bean.
+							// 从单例缓存中显式删除实例：它可能已经放在那里
+							// 急于通过创建过程，以允许循环引用解析。
+							// 还删除所有收到对该bean的临时引用的bean。
 							destroySingleton(beanName);
 							throw ex;
 						}
@@ -1037,8 +1040,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected boolean isPrototypeCurrentlyInCreation(String beanName) {
 		Object curVal = this.prototypesCurrentlyInCreation.get();
-		return (curVal != null &&
-				(curVal.equals(beanName) || (curVal instanceof Set && ((Set<?>) curVal).contains(beanName))));
+		return (curVal != null && (curVal.equals(beanName) || (curVal instanceof Set && ((Set<?>) curVal).contains(beanName))));
 	}
 
 	/**

@@ -1151,11 +1151,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return null;
 	}
 
+	/**
+	 * 解决属性依赖的问题，在这里创建了属性依赖和属性的创建
+	 * @param descriptor 依赖项的描述符（字段/方法/构造函数）
+	 * @param requestingBeanName 声明给定依赖项的bean的名称
+	 * @param autowiredBeanNames 一个集合，所有自动装配的bean的名称（用于解决给定的依赖关系）都应添加到这里面
+	 * @param typeConverter 用于填充数组和集合的TypeConverter
+	 * @return 被依赖的对象
+	 * @throws BeansException 异常信息
+	 */
 	@Override
 	@Nullable
 	public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
-
+		//初始化参数名称发现
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (Optional.class == descriptor.getDependencyType()) {
 			return createOptionalDependency(descriptor, requestingBeanName);
@@ -1171,13 +1180,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
 					descriptor, requestingBeanName);
 			if (result == null) {
-				//解决依赖性
+				//解决依赖性 这个是实际干活的方法
 				result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
 			}
 			return result;
 		}
 	}
 
+	/**
+	 * 实际查找依赖创建依赖的逻辑代码
+	 * @param descriptor 描述信息
+	 * @param beanName 顾名思义
+	 * @param autowiredBeanNames 需要自动注入的beanName
+	 * @param typeConverter 咳咳
+	 * @return 实际的对象
+	 * @throws BeansException 异常
+	 * @throws BeansException 异常
+	 */
 	@Nullable
 	public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
@@ -1203,7 +1222,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					return converter.convertIfNecessary(value, type, descriptor.getTypeDescriptor());
 				}
 				catch (UnsupportedOperationException ex) {
-					// A custom TypeConverter which does not support TypeDescriptor resolution...
+					// 自定义TypeConverter，不支持TypeDescriptor解析...
 					return (descriptor.getField() != null ?
 							converter.convertIfNecessary(value, type, descriptor.getField()) :
 							converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
@@ -1214,7 +1233,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (multipleBeans != null) {
 				return multipleBeans;
 			}
-
+			//根据类型和名称查询该bean的数据
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (isRequired(descriptor)) {
@@ -1226,6 +1245,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String autowiredBeanName;
 			Object instanceCandidate;
 
+			//当匹配的类有多个的时候
 			if (matchingBeans.size() > 1) {
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
@@ -1233,16 +1253,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						return descriptor.resolveNotUnique(descriptor.getResolvableType(), matchingBeans);
 					}
 					else {
-						// In case of an optional Collection/Map, silently ignore a non-unique case:
-						// possibly it was meant to be an empty collection of multiple regular beans
-						// (before 4.3 in particular when we didn't even look for collection beans).
+						// 如果是可选的Collection / Map，则静默忽略一个非唯一的情况：
+						//可能是多个常规bean的空集合
+						// （特别是在4.3之前，甚至在我们甚至没有寻找collection bean的时候）。
 						return null;
 					}
 				}
 				instanceCandidate = matchingBeans.get(autowiredBeanName);
 			}
 			else {
-				// We have exactly one match.
 				Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
 				autowiredBeanName = entry.getKey();
 				instanceCandidate = entry.getValue();
@@ -1251,6 +1270,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (autowiredBeanNames != null) {
 				autowiredBeanNames.add(autowiredBeanName);
 			}
+			//这一步是真正创建一个类这里面会调用getBean方法重新的走上面的那一套创建bean的逻辑
 			if (instanceCandidate instanceof Class) {
 				instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
 			}

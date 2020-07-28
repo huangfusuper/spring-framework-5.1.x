@@ -372,6 +372,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		//查找自动装配元数据
 		InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
 		try {
+			//注入逻辑
 			metadata.inject(bean, beanName, pvs);
 		}
 		catch (BeanCreationException ex) {
@@ -586,6 +587,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		 */
 		@Override
 		protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
+			//获取需要注入的属性对象
 			Field field = (Field) this.member;
 			Object value;
 			if (this.cached) {
@@ -598,9 +600,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				Assert.state(beanFactory != null, "No BeanFactory available");
 				TypeConverter typeConverter = beanFactory.getTypeConverter();
 				try {
-
-
-
+					//真正的解决依赖的代码，查找依赖创建依赖的代码
 					value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
 				}
 				catch (BeansException ex) {
@@ -628,6 +628,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				}
 			}
 			if (value != null) {
+				//反射的注入逻辑
 				ReflectionUtils.makeAccessible(field);
 				field.set(bean, value);
 			}

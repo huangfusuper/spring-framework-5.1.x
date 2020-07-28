@@ -271,7 +271,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * <p>By default, only the BeanFactoryAware interface is ignored.
 	 * For further types to ignore, invoke this method for each type.
 	 * @see org.springframework.beans.factory.BeanFactoryAware
-	 * @see org.springframework.context.ApplicationContextAware
+	 * @see org.springframework.context
 	 */
 	public void ignoreDependencyInterface(Class<?> ifc) {
 		this.ignoredDependencyInterfaces.add(ifc);
@@ -521,8 +521,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return beanInstance;
 		}
 		catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-			// A previously detected exception with proper bean creation context already,
-			// or illegal singleton state to be communicated up to DefaultSingletonBeanRegistry.
+			//先前检测到的具有正确的bean创建上下文的异常，
+			//或非法的单例状态，最多可以传达给DefaultSingletonBeanRegistry。
 			throw ex;
 		}
 		catch (Throwable ex) {
@@ -534,11 +534,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * 实际创建指定的bean。 此时，例如检查{@code postProcessBeforeInstantiation}回调。
 	 * <p>在默认的bean实例化，使用工厂方法和自动装配构造函数之间进行区分。<p/>
-	 * @param beanName the name of the bean
-	 * @param mbd the merged bean definition for the bean
-	 * @param args explicit arguments to use for constructor or factory method invocation
-	 * @return a new instance of the bean
-	 * @throws BeanCreationException if the bean could not be created
+	 * @param beanName bean的名字
+	 * @param mbd bean的合并bean定义
+	 * @param args 用于构造函数或工厂方法调用的显式参数
+	 * @return Bean的新实例
+	 * @throws BeanCreationException 如果无法创建该bean
 	 * @see #instantiateBean
 	 * @see #instantiateUsingFactoryMethod
 	 * @see #autowireConstructor
@@ -552,7 +552,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
-			//开始创建bean 的逻辑
+			//开始创建bean 的逻辑  这里实际上该类已经被实例化了 只不过返回的是一个包装对象，包装对象内部存在该实例化好的对象
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		//获取之前创建的bean
@@ -586,6 +586,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						"' to allow for resolving potential circular references");
 			}
 			//这个方法时将当前实例号的bean放置到三级缓存 三级缓存内部存放的时 beanName -> bean包装对象  这个样的kv键值对
+			//设置这个方法的目的时 Spring设计时是期望Spring再bean实例化之后去做代理对象的操作，而不是再创建的时候就判断是否是代理对象
+			//但实际上如果发生了循环引用的话，被依赖的类就会被提前创建出来，并且注入到目标类中，为了保证注入的是一个实际的代理对象，所以Spring来了个偷天换日，偷梁换柱
+			//后续需要注入的时候，只需要通过工厂方法返回数据就可以了，在工厂里面可以做代理相关的操作，执行完代理操作后，在返回对象
+			//符合了Spring设计时，为了保证代理对象的包装再Springbean生命周期的后几步来实现的预期
+			//这一步还会删除二级缓存的数据
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 
@@ -593,7 +598,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		try {
 			//填充内部的属性
+			//这一步解决了循环依赖的问题，在这里发生了自动注入的逻辑
 			populateBean(beanName, mbd, instanceWrapper);
+			//执行初始化的逻辑  以及生命周期的回调
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1410,6 +1417,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					//因为是使用@Autowired注解做的自动注入
+					// 故而Spring会使用 AutowiredAnnotationBeanPostProcessor.postProcessProperties来处理自动注入
 					PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 					if (pvsToUse == null) {
 						if (filteredPds == null) {

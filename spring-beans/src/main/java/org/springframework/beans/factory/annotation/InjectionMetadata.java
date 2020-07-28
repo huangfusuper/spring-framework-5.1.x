@@ -78,15 +78,22 @@ public class InjectionMetadata {
 		this.checkedElements = checkedElements;
 	}
 
+	/**
+	 * 这里是注入逻辑
+	 * @param target 目标对象
+	 * @param beanName 目标名称
+	 * @param pvs 参数
+	 * @throws Throwable 异常信息
+	 */
 	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 		Collection<InjectedElement> checkedElements = this.checkedElements;
-		Collection<InjectedElement> elementsToIterate =
-				(checkedElements != null ? checkedElements : this.injectedElements);
+		Collection<InjectedElement> elementsToIterate = (checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
 				}
+				//注入逻辑发生的实际代码 因为是属性注入，所以 使用AutowiredFieldElement.inject
 				element.inject(target, beanName, pvs);
 			}
 		}
