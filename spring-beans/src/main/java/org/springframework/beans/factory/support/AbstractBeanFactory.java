@@ -319,6 +319,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// 创建bean实例。 这个是个真正的创建bean实例的方法   单例池获取，没有的话就将该bean加入到正在创建  然后走创建bean的回调
 				if (mbd.isSingleton()) {
+					//这个方法很重要，方法内部会做这样几件事：
+					//1.判断当前的一级缓存里面有没有bean
+					//2.没有就回调java8里面的回调方法(createBean)创建方法，添加到一级缓存，返回bean
+					//3.一级缓存存在就直接返回该bean
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							//这里是真正的创建bean的逻辑，由 {@link #getSingleton} 方法回调该对象去走真正的执行创建bean的逻辑

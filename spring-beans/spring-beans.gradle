@@ -9,6 +9,8 @@ dependencies {
 	optional("org.codehaus.groovy:groovy-xml:${groovyVersion}")
 	optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 	optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+	// https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-all
+	compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.5', ext: 'pom'
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 }
 
