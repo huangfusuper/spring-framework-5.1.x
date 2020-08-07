@@ -845,6 +845,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					}
 				} else {
 					//普通的bean
+					//这里明明没有bean按道理来说应该叫createBean  为甚么是getBean 归根到底就是为了解决循环依赖
 					getBean(beanName);
 				}
 			}

@@ -425,6 +425,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		Object result = existingBean;
+		//AOP的后置处理器被{@link org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator.postProcessAfterInitialization} 拦截
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
 			Object current = processor.postProcessAfterInitialization(result, beanName);
 			if (current == null) {
@@ -601,6 +602,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//这一步解决了循环依赖的问题，在这里发生了自动注入的逻辑
 			populateBean(beanName, mbd, instanceWrapper);
 			//执行初始化的逻辑  以及生命周期的回调
+			//什么是生命周期的回调 诸如 BeanPostProcessors的前置方法   类的初始化方法    BeanPostProcessors的后置方法（这个也是SpringAOP代理生成的地方）
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1749,8 +1751,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
-	 * Initialize the given bean instance, applying factory callbacks
-	 * as well as init methods and bean post processors.
+	 * 初始化给定的bean实例，应用工厂回调以及init方法和bean后处理器。
 	 * <p>Called from {@link #createBean} for traditionally defined beans,
 	 * and from {@link #initializeBean} for existing bean instances.
 	 * @param beanName the bean name in the factory (for debugging purposes)
@@ -1764,32 +1765,35 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #applyBeanPostProcessorsBeforeInitialization
 	 * @see #invokeInitMethods
 	 * @see #applyBeanPostProcessorsAfterInitialization
+	 * 初始话类 这里是类-》bena的最后一步。调用初始化方法和调用bean后置处理器以及Aware接口方法，也是我们能够插手bean生成的最后一步
 	 */
 	protected Object initializeBean(final String beanName, final Object bean, @Nullable RootBeanDefinition mbd) {
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+				//回调Aware接口方法
 				invokeAwareMethods(beanName, bean);
 				return null;
 			}, getAccessControlContext());
 		}
 		else {
+			//回调Aware接口方法
 			invokeAwareMethods(beanName, bean);
 		}
-
+		//留存快照bean
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			//调用这个bean 后置处理器的前置处理器 {@link BeanPostProcessor#postProcessBeforeInitialization()}
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
-
 		try {
+			//回调初始化方法
 			invokeInitMethods(beanName, wrappedBean, mbd);
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(
-					(mbd != null ? mbd.getResourceDescription() : null),
-					beanName, "Invocation of init method failed", ex);
+		} catch (Throwable ex) {
+			throw new BeanCreationException( (mbd != null ? mbd.getResourceDescription() : null), beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			//回调bean后置处理器的后置方法 {@link BeanPostProcessor#postProcessAfterInitialization()}
+			//这里也是AOP完成装载的地方，这一步也就到达了一个类从正常的类变成bean的最后一步
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 

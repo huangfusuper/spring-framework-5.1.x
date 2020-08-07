@@ -94,30 +94,38 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 
 
 	/**
-	 * Check the interfaces on the given bean class and apply them to the {@link ProxyFactory},
-	 * if appropriate.
+	 * 检查给定bean类上的接口，并将其应用于{@link ProxyFactory}，
+	 * 如果合适的话。
 	 * <p>Calls {@link #isConfigurationCallbackInterface} and {@link #isInternalLanguageInterface}
 	 * to filter for reasonable proxy interfaces, falling back to a target-class proxy otherwise.
 	 * @param beanClass the class of the bean
 	 * @param proxyFactory the ProxyFactory for the bean
 	 */
 	protected void evaluateProxyInterfaces(Class<?> beanClass, ProxyFactory proxyFactory) {
+		//检查对应bean的接口
 		Class<?>[] targetInterfaces = ClassUtils.getAllInterfacesForClass(beanClass, getProxyClassLoader());
 		boolean hasReasonableProxyInterface = false;
 		for (Class<?> ifc : targetInterfaces) {
+			//三个条件
+			//第一：不是一些回调的方法接口类似InitializingBean直接的子类
+			//第二：不是内部的一些接口的子类
+			//第三：接口不为空
 			if (!isConfigurationCallbackInterface(ifc) && !isInternalLanguageInterface(ifc) &&
 					ifc.getMethods().length > 0) {
+				//是一个有接口的而且是一个符合预设条件的bean
 				hasReasonableProxyInterface = true;
 				break;
 			}
 		}
 		if (hasReasonableProxyInterface) {
-			// Must allow for introductions; can't just set interfaces to the target's interfaces only.
+			// 必须允许介绍；不能仅将接口设置为目标的接口。
+			//如果存在接口将接口放置到代理工厂里面
 			for (Class<?> ifc : targetInterfaces) {
 				proxyFactory.addInterface(ifc);
 			}
 		}
 		else {
+			//设置不代理接口而是代理目标类 为什么？因为没有接口，嘿嘿！
 			proxyFactory.setProxyTargetClass(true);
 		}
 	}

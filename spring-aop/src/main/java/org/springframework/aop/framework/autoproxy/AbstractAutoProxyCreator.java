@@ -294,8 +294,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	@Override
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
+			//这里获取缓存的key然后从下面去取 什么时候缓存的呢？
+			//还记得为了解决循环依赖而引进的三级缓存不，明明二级缓存就能够解决，但是偏偏使用了三级缓存，而且三级缓存还是使用了一个工厂
+			//org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.getEarlyBeanReference 没错这个方法再
+			//使用工厂返回对应的代理对象的时候，会调用org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator.getEarlyBeanReference
+			//缓存一份自己的对象，这里就直接获取了
+			//这样再三级缓存进行返回了动态代理之后这里就不进行AOP的逻辑了 直接返回已经被三级缓存处理好额bean
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			//这里是判断之前存储的AOP代理类是不是和创建好的bean不一致，如果一致就证明这个bean就已经是代理类了不需要走后续的AOP逻辑了
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
+				//如果判断需要代理则执行AOP代理的包装逻辑
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -325,35 +333,44 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Wrap the given bean if necessary, i.e. if it is eligible for being proxied.
-	 * @param bean the raw bean instance
-	 * @param beanName the name of the bean
-	 * @param cacheKey the cache key for metadata access
-	 * @return a proxy wrapping the bean, or the raw bean instance as-is
+	 * 必要时包装给定的bean，即是否有资格被代理。
+	 * @param bean 原始bean实例
+	 * @param beanName 豆的名字
+	 * @param cacheKey 用于元数据访问的缓存键
+	 * @return 包装Bean的代理，或按原样封装Raw Bean实例
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		//不知道后续研究
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+		//如果设置了不允许代理，就直接返回
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
+		//如果是本身就是AOP类 比如加了 @Asptj的类等一些基础设置会跳过不做代理，同时会将该类标注为不允许代理
+		//设置了跳过  但是这个我需要后续取看
+		// TODO 不是这次看到主要代码 以后看
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
 			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
 
-		// Create proxy if we have advice.
+		//这里就是寻找这个bean的切点的  寻找对应的AOP代理
+		//这个也是难点 他是如何寻找到该bean对应的切点的呢？
+		//TODO 一会看，先看主要逻辑！
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
+			//如果是允许代理的话
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
-			Object proxy = createProxy(
-					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			//这一步是主要逻辑，创建一个代理对象  参数为：类的类对象  bean的名称  代理类的信息（位置，切点等信息）  bean对象
+			Object proxy = createProxy( bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
 			return proxy;
 		}
-
+		//如果查询出该类不允许被代理，将该bean 修改为不可代理！
 		this.advisedBeans.put(cacheKey, Boolean.FALSE);
+		//返回原始的Bean对象
 		return bean;
 	}
 
@@ -429,24 +446,27 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Create an AOP proxy for the given bean.
-	 * @param beanClass the class of the bean
-	 * @param beanName the name of the bean
-	 * @param specificInterceptors the set of interceptors that is
-	 * specific to this bean (may be empty, but not null)
-	 * @param targetSource the TargetSource for the proxy,
-	 * already pre-configured to access the bean
-	 * @return the AOP proxy for the bean
+	 * 为给定的bean创建一个AOP代理。
+	 * @param beanClass bean的类型
+	 * @param beanName bean的名字
+	 * @param specificInterceptors 一组拦截器信息
+	 * 特定于此bean（可以为空，但不能为null）
+	 * @param targetSource 代理的对象
+	 * 已经预先配置为访问Bean
+	 * @return Bean的AOP代理
 	 * @see #buildAdvisors
 	 */
 	protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
 			@Nullable Object[] specificInterceptors, TargetSource targetSource) {
-
+		//判断beanFactory的类型
 		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+			//提前暴露这个bean是一个代理的类 如何设置呢？
+			//就是再该bean的bd下面设置一个代理信息
 			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
 		}
-
+		//创建一个代理工厂
 		ProxyFactory proxyFactory = new ProxyFactory();
+		//设置初始化参数
 		proxyFactory.copyFrom(this);
 
 		if (!proxyFactory.isProxyTargetClass()) {
@@ -454,20 +474,24 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				proxyFactory.setProxyTargetClass(true);
 			}
 			else {
+				//正常的代理逻辑 判断设置一些代理参数
 				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}
-
+		//包装代理信息 切点信息包装
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
+		//向工厂设置代理切点信息
 		proxyFactory.addAdvisors(advisors);
+		//设置代理的目标类的包装类  嘿嘿嘿
 		proxyFactory.setTargetSource(targetSource);
+		//空方法  Spring没做实现  扩展点
 		customizeProxyFactory(proxyFactory);
 
 		proxyFactory.setFrozen(this.freezeProxy);
 		if (advisorsPreFiltered()) {
 			proxyFactory.setPreFiltered(true);
 		}
-
+		//真正代理逻辑 这里主要是获取一个真正代理 参数是类加载器
 		return proxyFactory.getProxy(getProxyClassLoader());
 	}
 

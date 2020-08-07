@@ -1,8 +1,7 @@
 package com.debug;
 
-import com.conf.SpringDebugConfig;
-import com.service.CustomizeScannerClass;
-import com.service.DebugService;
+import com.aop.SpringAopConfig;
+import com.aop.service.AopService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -10,11 +9,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author huangfu
  */
 public class SpringDebug {
-	public static void main(String[] args) {
-		AnnotationConfigApplicationContext app = new AnnotationConfigApplicationContext(SpringDebugConfig.class);
-		DebugService debugService = app.getBean(DebugService.class);
-		CustomizeScannerClass bean = app.getBean(CustomizeScannerClass.class);
-		System.out.println(debugService.debugMethod("嘿嘿"));
-		System.out.println(bean.customizeType("皇甫"));
+	public static void main(String[] args) throws InterruptedException {
+		AnnotationConfigApplicationContext app = new AnnotationConfigApplicationContext(SpringAopConfig.class);
+		System.out.println(app.getBean(AopService.class).testAop("asd"));
 	}
 }

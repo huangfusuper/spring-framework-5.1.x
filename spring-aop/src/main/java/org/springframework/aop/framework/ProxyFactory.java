@@ -98,15 +98,15 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
-	 * Create a new proxy according to the settings in this factory.
-	 * <p>Can be called repeatedly. Effect will vary if we've added
-	 * or removed interfaces. Can add and remove interceptors.
-	 * <p>Uses the given class loader (if necessary for proxy creation).
-	 * @param classLoader the class loader to create the proxy with
-	 * (or {@code null} for the low-level proxy facility's default)
-	 * @return the proxy object
+	 * 根据此工厂中的设置创建一个新的代理。
+	 * <p>可以反复调用。如果我们添加了效果会有所不同 或删除的接口。可以添加和删除拦截器。
+	 * <p>使用给定的类加载器（如果需要创建代理）。
+	 * @param classLoader 类加载器以创建代理 （或{@code null}为低级代理工具的默认值）
+	 * @return 代理对象
 	 */
 	public Object getProxy(@Nullable ClassLoader classLoader) {
+		//createAopProxy返回使用的代理类型
+		//getProxy使用返回的代理类型创建代理对象
 		return createAopProxy().getProxy(classLoader);
 	}
 

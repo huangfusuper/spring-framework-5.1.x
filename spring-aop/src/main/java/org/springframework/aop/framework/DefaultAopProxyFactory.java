@@ -22,19 +22,16 @@ import java.lang.reflect.Proxy;
 import org.springframework.aop.SpringProxy;
 
 /**
- * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
- * or a JDK dynamic proxy.
+ * 默认的{@link AopProxyFactory}实现，创建CGLIB代理或JDK动态代理。
  *
- * <p>Creates a CGLIB proxy if one the following is true for a given
- * {@link AdvisedSupport} instance:
+ * <p>如果给定以下条件为真，则创建一个CGLIB代理 {@link AdvisedSupport} 事例:
  * <ul>
- * <li>the {@code optimize} flag is set
- * <li>the {@code proxyTargetClass} flag is set
- * <li>no proxy interfaces have been specified
+ * <li>{@code优化}标志已设置
+ * <li>{@code proxyTargetClass}标志已设置
+ * <li>没有指定代理接口
  * </ul>
  *
- * <p>In general, specify {@code proxyTargetClass} to enforce a CGLIB proxy,
- * or specify one or more interfaces to use a JDK dynamic proxy.
+ * <p>通常，指定{@code proxyTargetClass}强制执行CGLIB代理，或指定一个或多个接口以使用JDK动态代理。
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -48,6 +45,10 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
+		//三个条件
+		//1.设置了优化
+		//2.proxyTargetClass 前面设置的 {@link org.springframework.aop.framework.ProxyProcessorSupport.evaluateProxyInterfaces} 设置的是否有接口 没有接口就为true
+		//3.没接口
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
 			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
@@ -60,6 +61,7 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 			return new ObjenesisCglibAopProxy(config);
 		}
 		else {
+			//以上条件不成立  存在接口就返回一个jdk动态代理！
 			return new JdkDynamicAopProxy(config);
 		}
 	}

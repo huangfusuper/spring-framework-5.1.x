@@ -13,15 +13,16 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  * @author huangfu
  */
 @Configuration
-@ComponentScan("com.service")
+@ComponentScan(basePackages = {"com.service","com.aop"})
+@EnableAspectJAutoProxy
 public class SpringDebugConfig {
 
-	@Bean
+	//@Bean
 	public MyBeanPostProcessor myBeanPostProcessor(){
 		return new MyBeanPostProcessor();
 	}
 
-	@Bean
+	//@Bean
 	public MyBeanFactoryPostProcessor myBeanFactoryPostProcessor() {
 		return new MyBeanFactoryPostProcessor();
 	}
@@ -29,8 +30,10 @@ public class SpringDebugConfig {
 	 * 使用自定义注解的扫描器
 	 * @param applicationContext
 	 * @return
+	 *
+	 *
 	 */
-	@Bean
+	//@Bean
 	public ClassPathBeanDefinitionScanner classPathBeanDefinitionScanner(ApplicationContext  applicationContext){
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = (AnnotationConfigApplicationContext) applicationContext;
 		ClassPathBeanDefinitionScanner classPathBeanDefinitionScanner = new ClassPathBeanDefinitionScanner(annotationConfigApplicationContext);
