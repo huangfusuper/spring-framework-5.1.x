@@ -287,8 +287,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Create a proxy with the configured interceptors if the bean is
-	 * identified as one to proxy by the subclass.
+	 * 如果bean被子类标识为要代理的bean，则使用配置的拦截器创建代理。
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
 	@Override
