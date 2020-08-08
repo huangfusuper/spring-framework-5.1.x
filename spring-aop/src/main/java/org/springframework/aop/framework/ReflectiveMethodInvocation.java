@@ -195,10 +195,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 	/**
-	 * Invoke the joinpoint using reflection.
-	 * Subclasses can override this to use custom invocation.
-	 * @return the return value of the joinpoint
-	 * @throws Throwable if invoking the joinpoint resulted in an exception
+	 * 使用反射调用连接点。 子类可以重写此方法以使用自定义调用。
+	 * @return 连接点的返回值
+	 * @throws Throwable 如果调用联接点导致异常
 	 */
 	@Nullable
 	protected Object invokeJoinpoint() throws Throwable {
