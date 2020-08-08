@@ -1,4 +1,4 @@
-package simulation.annotations;
+package simulation.ioc.annotations;
 
 import java.lang.annotation.*;
 

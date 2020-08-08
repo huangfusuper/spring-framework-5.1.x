@@ -245,26 +245,29 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
 		if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
+			//advisedBeans用于存储不可代理的bean，如果包含直接返回
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
+			////判断当前bean是否可以被代理，然后存入advisedBeans
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
 				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
 			}
 		}
 
-		// Create proxy here if we have a custom TargetSource.
-		// Suppresses unnecessary default instantiation of the target bean:
-		// The TargetSource will handle target instances in a custom fashion.
+		// 获取封装当前bean的TargetSource对象，如果不存在，则直接退出当前方法，否则从TargetSource中获取当前bean对象，并且判断是否需要将切面逻辑应用在当前bean上。
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
 			if (StringUtils.hasLength(beanName)) {
 				this.targetSourcedBeans.add(beanName);
 			}
+			//获取能够应用当前bean的切面逻辑
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
 			Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
+			//对生成的代理对象进行缓存
 			this.proxyTypes.put(cacheKey, proxy.getClass());
+			//如果最终可以获得代理类，则返回代理类，直接执行实例化后置通知方法
 			return proxy;
 		}
 
@@ -339,15 +342,17 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return 包装Bean的代理，或按原样封装Raw Bean实例
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-		//不知道后续研究
+		//如果已经处理过（targetSourcedBeans存放已经增强过的bean）
 		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
 			return bean;
 		}
+		////advisedBeans的key为cacheKey，value为boolean类型，表示是否进行过代理
 		//如果设置了不允许代理，就直接返回
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
 		//如果是本身就是AOP类 比如加了 @Asptj的类等一些基础设置会跳过不做代理，同时会将该类标注为不允许代理
+		//Advice、Pointcut、Advisor、AopInfrastructureBean
 		//设置了跳过  但是这个我需要后续取看
 		// TODO 不是这次看到主要代码 以后看
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
@@ -357,7 +362,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		//这里就是寻找这个bean的切点的  寻找对应的AOP代理
 		//这个也是难点 他是如何寻找到该bean对应的切点的呢？
-		//TODO 一会看，先看主要逻辑！
+		//获取当前对象所有适用的Advisor.找到所有切点是他的对应的@Aspect注解的类
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
 			//如果是允许代理的话

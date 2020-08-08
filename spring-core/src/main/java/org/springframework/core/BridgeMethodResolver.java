@@ -79,15 +79,15 @@ public final class BridgeMethodResolver {
 			return candidateMethods.get(0);
 		}
 
-		// Search for candidate match.
+		// 搜索候选匹配。
 		Method bridgedMethod = searchCandidates(candidateMethods, bridgeMethod);
 		if (bridgedMethod != null) {
-			// Bridged method found...
+			// 找到桥接方法...
 			return bridgedMethod;
 		}
 		else {
-			// A bridge method was passed in but we couldn't find the bridged method.
-			// Let's proceed with the passed-in method and hope for the best...
+			//传入了桥接方法，但我们找不到桥接方法。
+			// 让我们继续传入的方法，并期盼最好的...
 			return bridgeMethod;
 		}
 	}

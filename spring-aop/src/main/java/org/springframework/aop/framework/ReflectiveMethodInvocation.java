@@ -93,7 +93,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 
 	/**
-	 * Construct a new ReflectiveMethodInvocation with the given arguments.
+	 * 使用给定的参数构造一个新的ReflectiveMethodInvocation。
 	 * @param proxy the proxy object that the invocation was made on
 	 * @param target the target object to invoke
 	 * @param method the method to invoke
@@ -112,6 +112,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.proxy = proxy;
 		this.target = target;
 		this.targetClass = targetClass;
+		//匹配方法
 		this.method = BridgeMethodResolver.findBridgedMethod(method);
 		this.arguments = AopProxyUtils.adaptArgumentsIfNecessary(method, arguments);
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
@@ -160,9 +161,16 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
+			//当调用链全部调用完毕后  开始执行真正的目标方法
+			//注意 这个是重点，为什么？
+			//因为再构建的时候 会将全部的拦截器注册到调用链里面采用责任链的设计模式
+			//同时会将调用链传递到每一步的方法里面，再调用链没有调用完毕之前不会调用真正的目标方法
+			//而是会调用调用链里面所代表的方法执行下一个切点拦截器
+			//而这一步就是真正的调用链被调用完毕之后，真正所执行的方法
+			//那么这个方法就一定是调用目标方法的方法
 			return invokeJoinpoint();
 		}
-
+		//interceptorsAndDynamicMethodMatchers  这里是传过来的切点方法  该bean对应几个切点  就会有几个拦截器
 		Object interceptorOrInterceptionAdvice =
 				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
@@ -175,8 +183,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 				return dm.interceptor.invoke(this);
 			}
 			else {
-				// Dynamic matching failed.
-				// Skip this interceptor and invoke the next in the chain.
+				// 动态匹配失败。  不是InterceptorAndDynamicMethodMatcher类型的
+				// 跳过此拦截器并调用链中的下一个拦截器。
 				return proceed();
 			}
 		}
@@ -194,6 +202,9 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 */
 	@Nullable
 	protected Object invokeJoinpoint() throws Throwable {
+		/**
+		 * 这一步就是真正的反射调用一个方法的方法  ，目标类   目标方法  目标参数
+		 */
 		return AopUtils.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
 	}
 

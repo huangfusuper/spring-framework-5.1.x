@@ -1,7 +1,7 @@
-package simulation;
+package simulation.ioc;
 
-import simulation.annotations.MyAutowired;
-import simulation.service.AService;
+import simulation.ioc.annotations.MyAutowired;
+import simulation.ioc.service.AService;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;

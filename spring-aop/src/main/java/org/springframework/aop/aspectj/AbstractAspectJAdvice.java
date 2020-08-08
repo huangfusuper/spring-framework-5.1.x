@@ -641,6 +641,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			ReflectionUtils.makeAccessible(this.aspectJAdviceMethod);
 			// TODO AopUtils.invokeJoinpointUsingReflection
 			//这个就是切面方法的对象 在这里反射执行
+			//切面方法反射执行 切面参数里面携带的有原始方法的方法对象以及对象 参数等
+			//再切面方法里面再去执行原始方法 完成最终的方法拦截
 			return this.aspectJAdviceMethod.invoke(this.aspectInstanceFactory.getAspectInstance(), actualArgs);
 		}
 		catch (IllegalArgumentException ex) {
