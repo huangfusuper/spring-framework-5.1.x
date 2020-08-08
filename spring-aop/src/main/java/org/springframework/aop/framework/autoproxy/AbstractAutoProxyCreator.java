@@ -418,8 +418,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	}
 
 	/**
-	 * Create a target source for bean instances. Uses any TargetSourceCreators if set.
-	 * Returns {@code null} if no custom TargetSource should be used.
+	 * 为bean实例创建目标源。使用任何TargetSourceCreators（如果已设置）。 如果不应该使用自定义TargetSource，则返回{@code null}。
 	 * <p>This implementation uses the "customTargetSourceCreators" property.
 	 * Subclasses can override this method to use a different mechanism.
 	 * @param beanClass the class of the bean to create a TargetSource for
