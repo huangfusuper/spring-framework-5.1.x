@@ -74,8 +74,8 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 
 
 	/**
-	 * Look for AspectJ-annotated aspect beans in the current bean factory,
-	 * and return to a list of Spring AOP Advisors representing them.
+	 * 在当前的bean工厂中查找带有AspectJ注释的Aspect bean，
+	 * 并返回代表它们的Spring AOP Advisor列表。
 	 * <p>Creates a Spring Advisor for each AspectJ advice method.
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
@@ -95,8 +95,8 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (!isEligibleBean(beanName)) {
 							continue;
 						}
-						// We must be careful not to instantiate beans eagerly as in this case they
-						// would be cached by the Spring container but would not have been weaved.
+						// 我们必须注意不要急于实例化bean，因为在这种情况下，它们
+						// 将由Spring容器缓存，但不会被编织。
 						Class<?> beanType = this.beanFactory.getType(beanName);
 						if (beanType == null) {
 							continue;

@@ -72,7 +72,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-
+		//查询对应的通知
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -81,9 +81,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Find all eligible Advisors for auto-proxying this class.
-	 * @param beanClass the clazz to find advisors for
-	 * @param beanName the name of the currently proxied bean
+	 * 查找所有合格的顾问以自动代理该课程。
+	 * @param beanClass 寻找顾问的思路
+	 * @param beanName 当前代理的bean的名称
 	 * @return the empty List, not {@code null},
 	 * if there are no pointcuts or interceptors
 	 * @see #findCandidateAdvisors

@@ -116,12 +116,12 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		String aspectName = aspectInstanceFactory.getAspectMetadata().getAspectName();
 		validate(aspectClass);
 
-		// We need to wrap the MetadataAwareAspectInstanceFactory with a decorator
-		// so that it will only instantiate once.
-		MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
-				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
+		// 我们需要用装饰器包装MetadataAwareAspectInstanceFactory
+		// 这样它只会实例化一次。
+		MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory = new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
 		List<Advisor> advisors = new ArrayList<>();
+		//这里会遍历切面的所有方法  存储到集合里面
 		for (Method method : getAdvisorMethods(aspectClass)) {
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
