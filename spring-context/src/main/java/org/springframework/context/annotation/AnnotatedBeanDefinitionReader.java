@@ -198,21 +198,19 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
-	 * Register a bean from the given bean class, deriving its metadata from
-	 * class-declared annotations.
-	 * @param annotatedClass the class of the bean
-	 * @param instanceSupplier a callback for creating an instance of the bean
+	 * 从给定的bean类中注册一个bean，从中获取其元数据 类声明的注释。
+	 * @param annotatedClass 豆类
+	 * @param instanceSupplier 用于创建bean实例的回调
 	 * (may be {@code null})
-	 * @param name an explicit name for the bean
-	 * @param qualifiers specific qualifier annotations to consider, if any,
-	 * in addition to qualifiers at the bean class level
-	 * @param definitionCustomizers one or more callbacks for customizing the
+	 * @param name Bean的显式名称
+	 * @param qualifiers 要考虑的特定限定词注释，如果有的话， 除了Bean类级别的限定符
+	 * @param definitionCustomizers 一个或多个用于自定义
 	 * factory's {@link BeanDefinition}, e.g. setting a lazy-init or primary flag
 	 * @since 5.0
 	 */
 	<T> void doRegisterBean(Class<T> annotatedClass, @Nullable Supplier<T> instanceSupplier, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, BeanDefinitionCustomizer... definitionCustomizers) {
-
+		//带注释的泛型Bean定义
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
@@ -220,6 +218,7 @@ public class AnnotatedBeanDefinitionReader {
 
 		abd.setInstanceSupplier(instanceSupplier);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+		//是否是单例
 		abd.setScope(scopeMetadata.getScopeName());
 		String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
 

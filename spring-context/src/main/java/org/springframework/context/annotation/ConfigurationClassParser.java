@@ -166,6 +166,7 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				//注解类型的类 @Comment
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				}
@@ -625,7 +626,7 @@ class ConfigurationClassParser {
 
 
 	/**
-	 * Factory method to obtain a {@link SourceClass} from a {@link ConfigurationClass}.
+	 * 从{@link ConfigurationClass}获取{@link SourceClass}的工厂方法。
 	 */
 	private SourceClass asSourceClass(ConfigurationClass configurationClass) throws IOException {
 		AnnotationMetadata metadata = configurationClass.getMetadata();
