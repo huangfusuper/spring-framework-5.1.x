@@ -219,39 +219,45 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 */
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+		//获取bean工程的唯一id
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
-			throw new IllegalStateException(
-					"postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
+			throw new IllegalStateException( "postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
 		}
 		if (this.factoriesPostProcessed.contains(registryId)) {
-			throw new IllegalStateException(
-					"postProcessBeanFactory already called on this post-processor against " + registry);
+			throw new IllegalStateException( "postProcessBeanFactory already called on this post-processor against " + registry);
 		}
+		// 表示此registry里的bd收集动作，已经做了  避免再重复收集此registry
 		this.registriesPostProcessed.add(registryId);
 		//这里是真正获取bd的地方
+		// 根据配置类，收集到所有的bd信息
+		// 并且做出mark标注：是Full模式还是Lite模式，和很重要很重要
 		processConfigBeanDefinitions(registry);
 	}
 
 	/**
-	 * Prepare the Configuration classes for servicing bean requests at runtime
-	 * by replacing them with CGLIB-enhanced subclasses.
+	 * 准备配置类以在运行时为Bean请求提供服务
+	 * 通过用CGLIB增强的子类替换它们。
 	 */
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		int factoryId = System.identityHashCode(beanFactory);
 		if (this.factoriesPostProcessed.contains(factoryId)) {
-			throw new IllegalStateException(
-					"postProcessBeanFactory already called on this post-processor against " + beanFactory);
+			// 防止重复处理
+			throw new IllegalStateException("postProcessBeanFactory already called on this post-processor against " + beanFactory);
 		}
 		this.factoriesPostProcessed.add(factoryId);
+		// 在执行postProcessBeanDefinitionRegistry方法的时就已经将
+		// 这个id添加到registriesPostProcessed集合中了
+		// 所以到这里就不会再重复执行配置类的解析了（解析@Import、@Bean等）
 		if (!this.registriesPostProcessed.contains(factoryId)) {
-			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
-			// Simply call processConfigurationClasses lazily at this point then.
+			// BeanDefinitionRegistryPostProcessor挂钩显然不受支持...
+			// 然后，此时懒惰地调用processConfigurationClasses即可。
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
-
+		//字节码增强配置类  貌似用的cglib
 		enhanceConfigurationClasses(beanFactory);
+		//添加了一个后置处理器 它是个SmartInstantiationAwareBeanPostProcessor
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
@@ -366,12 +372,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
-	 * Post-processes a BeanFactory in search of Configuration class BeanDefinitions;
-	 * any candidates are then enhanced by a {@link ConfigurationClassEnhancer}.
-	 * Candidate status is determined by BeanDefinition attribute metadata.
+	 * 对BeanFactory进行后处理以搜索配置类BeanDefinitions； 然后，任何候选人都将通过{@link ConfigurationClassEnhancer}.
+	 * 候选状态由BeanDefinition属性元数据确定。
 	 * @see ConfigurationClassEnhancer
 	 */
 	public void enhanceConfigurationClasses(ConfigurableListableBeanFactory beanFactory) {
+		// 最终需要做增强的Bean定义们
 		Map<String, AbstractBeanDefinition> configBeanDefs = new LinkedHashMap<>();
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDef = beanFactory.getBeanDefinition(beanName);
@@ -386,29 +392,40 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
 							"return type: Consider declaring such methods as 'static'.");
 				}
+				//// 如果是Full模式，才会放进来
 				configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);
 			}
 		}
 		if (configBeanDefs.isEmpty()) {
-			// nothing to enhance -> return immediately
+			// 没有什么可增强的->立即返回
 			return;
 		}
-
+		//配置类增强器
+		// ConfigurationClassEnhancer就是对配置类做增强操作的核心类
+		//初始化会初始化两个chlib拦截类  BeanFactoryAwareMethodInterceptor 和  BeanMethodInterceptor
+		//这个是重点  这个类里面的方法会产生最终的代理类
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer();
+		//对每个Full模式的配置类，一个个做enhance()增强处理
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {
 			AbstractBeanDefinition beanDef = entry.getValue();
-			// If a @Configuration class gets proxied, always proxy the target class
+			// 如果@Configuration类被代理，请始终代理目标类
+			//猜测 这里返回的是最终的代理类  保存在对应的属性里面  后续将对应的类全限定名 偷天换日的改造成代理类的全限定名 最终完成对Conf的代理
+			//
 			beanDef.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
 			try {
-				// Set enhanced subclass of the user-specified bean class
+				// 设置用户指定的bean类的增强子类
+				//CGLIB是给父类生成子类对象的方式实现代理，所以这里指定“父类”类型
 				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
 				if (configClass != null) {
+					//做增强处理，返回enhancedClass就是一个增强过的子类
 					Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
+					//不相等，证明代理成功，那就把实际类型设置进去
 					if (configClass != enhancedClass) {
 						if (logger.isTraceEnabled()) {
 							logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
 									"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 						}
+						//这样后面实例化配置类的实例时，实际实例化的就是增强子类喽
 						beanDef.setBeanClass(enhancedClass);
 					}
 				}

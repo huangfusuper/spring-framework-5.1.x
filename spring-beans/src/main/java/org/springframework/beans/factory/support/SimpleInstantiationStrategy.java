@@ -47,9 +47,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 
 	/**
-	 * Return the factory method currently being invoked or {@code null} if none.
-	 * <p>Allows factory method implementations to determine whether the current
-	 * caller is the container itself as opposed to user code.
+	 * 返回当前正在调用的工厂方法；如果没有，则返回{@code null}。
+	 * <p>允许工厂方法实现确定当前调用者是否是容器本身，而不是用户代码。
 	 */
 	@Nullable
 	public static Method getCurrentlyInvokedFactoryMethod() {
@@ -59,7 +58,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
-		// Don't override the class with CGLIB if no overrides.
+		// 如果没有覆盖，请不要使用CGLIB覆盖该类。
 		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
 			synchronized (bd.constructorArgumentLock) {

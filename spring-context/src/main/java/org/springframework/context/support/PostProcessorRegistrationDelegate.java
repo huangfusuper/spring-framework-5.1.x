@@ -137,6 +137,7 @@ final class PostProcessorRegistrationDelegate {
 
 			// 现在，调用到目前为止已处理的所有处理器的postProcessBeanFactory回调。
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
+			//常规的 普通的工厂后置处理器
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
 		}
 
