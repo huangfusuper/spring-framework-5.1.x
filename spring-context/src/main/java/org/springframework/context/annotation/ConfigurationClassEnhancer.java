@@ -391,6 +391,9 @@ class ConfigurationClassEnhancer {
 				// 相当于在代理代理类里执行了super(xxx);
 				// 但是，但是，但是，此时的this依旧是代理类
 				//这个事实上上调用的是本身的方法  最终会再次被调用到下面的 resolveBeanReference 方法
+				//这里的设计很奇妙  为什么这么说呢？
+				//当前调用的方法和调用的方法是一个方法的时候  就直接调用cglib父类  也就是原始类的创建方法直接创建
+				//当不一样的时候  会进入到下面的方法  直接由beanFactory返回  精妙！！
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 			//方法里调用的实例化方法会交给这里来执行
@@ -516,10 +519,8 @@ class ConfigurationClassEnhancer {
 		}
 
 		/**
-		 * Check whether the given method corresponds to the container's currently invoked
-		 * factory method. Compares method name and parameter types only in order to work
-		 * around a potential problem with covariant return types (currently only known
-		 * to happen on Groovy classes).
+		 * 检查给定的方法是否对应于容器的当前调用的工厂方法。
+		 * 仅比较方法名称和参数类型，以便解决协变量返回类型的潜在问题（当前仅在Groovy类上发生）。
 		 */
 		private boolean isCurrentlyInvokedFactoryMethod(Method method) {
 			Method currentlyInvoked = SimpleInstantiationStrategy.getCurrentlyInvokedFactoryMethod();
@@ -528,11 +529,10 @@ class ConfigurationClassEnhancer {
 		}
 
 		/**
-		 * Create a subclass proxy that intercepts calls to getObject(), delegating to the current BeanFactory
-		 * instead of creating a new instance. These proxies are created only when calling a FactoryBean from
-		 * within a Bean method, allowing for proper scoping semantics even when working against the FactoryBean
-		 * instance directly. If a FactoryBean instance is fetched through the container via &-dereferencing,
-		 * it will not be proxied. This too is aligned with the way XML configuration works.
+		 * 创建一个子类代理，该代理将拦截对getObject（）的调用，委托给当前的BeanFactory ，
+		 * 而不是创建新的实例。仅当在Bean方法中从调用FactoryBean时才创建这些代理，即使在直接针对FactoryBean
+		 * 实例进行工作时也允许适当的作用域语义。
+		 * 如果通过＆-dereferencing通过容器获取FactoryBean实例，则*将不会被代理。这也与XML配置的工作方式保持一致。
 		 */
 		private Object enhanceFactoryBean(final Object factoryBean, Class<?> exposedType,
 				final ConfigurableBeanFactory beanFactory, final String beanName) {
