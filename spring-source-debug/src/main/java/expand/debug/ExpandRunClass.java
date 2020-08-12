@@ -1,6 +1,7 @@
 package expand.debug;
 
 import expand.config.ExpandRunConfig;
+import expand.test.impl.TestServiceImpl;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -13,9 +14,8 @@ public class ExpandRunClass {
 	 */
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(ExpandRunConfig.class);
-		ExpandRunConfig runConfig = annotationConfigApplicationContext.getBean(ExpandRunConfig.class);
-
-		System.out.println(runConfig.getClass());
+		TestServiceImpl bean = annotationConfigApplicationContext.getBean(TestServiceImpl.class);
+		bean.testPrint();
 
 	}
 }

@@ -146,10 +146,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			else {
 				ReflectionUtils.makeAccessible(factoryMethod);
 			}
-
+			//记录原始的值
 			Method priorInvokedFactoryMethod = currentlyInvokedFactoryMethod.get();
 			try {
+				//设置新的值
 				currentlyInvokedFactoryMethod.set(factoryMethod);
+				//执行放啊  有cglib代理就走代理方法
 				Object result = factoryMethod.invoke(factoryBean, args);
 				if (result == null) {
 					result = new NullBean();
@@ -158,9 +160,11 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			}
 			finally {
 				if (priorInvokedFactoryMethod != null) {
+					//回复原来的值
 					currentlyInvokedFactoryMethod.set(priorInvokedFactoryMethod);
 				}
 				else {
+					//不存咋就删除现在的值
 					currentlyInvokedFactoryMethod.remove();
 				}
 			}
