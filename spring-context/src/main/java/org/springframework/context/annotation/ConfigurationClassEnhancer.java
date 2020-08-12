@@ -75,6 +75,8 @@ class ConfigurationClassEnhancer {
 			new BeanMethodInterceptor(),
 			//拦截 BeanFactoryAware 为里面的 setBeanFactory 赋值
 			new BeanFactoryAwareMethodInterceptor(),
+			//这个说实话  真魔幻  我自己实现cglib的时候一直在报错  报一个自己抛出的异常，异常原因是没有处理object里面的eques等
+			//方法，这个就是为了处理那些没有被拦截的方法的实例  这个些方法直接放行
 			NoOp.INSTANCE
 	};
 
@@ -117,13 +119,14 @@ class ConfigurationClassEnhancer {
 	}
 
 	/**
-	 * Creates a new CGLIB {@link Enhancer} instance.
+	 * 创建一个新的CGLIB {@link Enhancer}实例。
 	 */
 	private Enhancer newEnhancer(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
 		// 目标类型：会以这个作为父类型来生成字节码子类
 		enhancer.setSuperclass(configSuperClass);
 		//代理类实现EnhancedConfiguration接口，这个接口继承了BeanFactoryAware接口
+		//这一步很有必要，使得配置类强制实现 EnhancedConfiguration即BeanFactoryAware 这样就可以轻松的获取到beanFactory
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		// 设置生成的代理类不实现org.springframework.cglib.proxy.Factory接口
 		enhancer.setUseFactory(false);
@@ -245,7 +248,7 @@ class ConfigurationClassEnhancer {
 				threadContextClassLoader = currentThread.getContextClassLoader();
 			}
 			catch (Throwable ex) {
-				// Cannot access thread context ClassLoader - falling back...
+				// 无法访问线程上下文ClassLoader-回退...
 				return super.generate(cg);
 			}
 
@@ -258,7 +261,7 @@ class ConfigurationClassEnhancer {
 			}
 			finally {
 				if (overrideClassLoader) {
-					// Reset original thread context ClassLoader.
+					// 重置原始线程上下文ClassLoader。
 					currentThread.setContextClassLoader(threadContextClassLoader);
 				}
 			}
@@ -360,7 +363,7 @@ class ConfigurationClassEnhancer {
 				//先得到这个工厂Bean
 				Object factoryBean = beanFactory.getBean(BeanFactory.FACTORY_BEAN_PREFIX + beanName);
 				if (factoryBean instanceof ScopedProxyFactoryBean) {
-					// Scoped proxy factory beans are a special case and should not be further proxied
+					// 范围限定的代理工厂bean是一种特殊情况，不应进一步进行代理
 					// 如果工厂Bean已经是一个Scope代理Bean，则不需要再增强
 					// 因为它已经能够满足FactoryBean延迟初始化Bean了~
 				}
@@ -372,6 +375,11 @@ class ConfigurationClassEnhancer {
 			// 检查给定的方法是否与当前调用的容器相对应工厂方法。
 			// 比较方法名称和参数列表来确定是否是同一个方法
 			// 怎么理解这句话，参照下面详解吧
+			//在整个方法里面，我认为这个判断是核心，为什么说他是核心，因为只有这个判断返回的是false的时候他才会真正的走增强的逻辑
+			//什么时候会是false呢？
+			//首先  spring会获取到当前使用的方法   其次会获取当前调用的方法，当两个方法不一致的时候会返回false
+			//什么情况下胡不一致呢？
+			//当在bean方法里面调用了另一个方法，此时当前方法和调用方法不一致，导致返回课false然后去执行的增强逻辑
 			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// 这是个小细节：若你@Bean返回的是BeanFactoryPostProcessor类型
 				// 请你使用static静态方法，否则会打印这句日志的~~~~
@@ -379,7 +387,7 @@ class ConfigurationClassEnhancer {
 				// 当然也可能没影响，所以官方也只是建议而已~~~
 				if (logger.isInfoEnabled() &&
 						BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
-					logger.info(String.format("@Bean method %s.%s is non-static and returns an object " +
+					logger.info(String.format("@Bean method %s.%s is non-static and returns an object  " +
 									"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
 									"result in a failure to process annotations such as @Autowired, " +
 									"@Resource and @PostConstruct within the method's declaring " +
@@ -392,11 +400,15 @@ class ConfigurationClassEnhancer {
 				// 但是，但是，但是，此时的this依旧是代理类
 				//这个事实上上调用的是本身的方法  最终会再次被调用到下面的 resolveBeanReference 方法
 				//这里的设计很奇妙  为什么这么说呢？
+				//了解这个方法首先要对cglib有一个基础的认识 为什么这么说呗？
+				//首先要明白 cglib是基于子类集成的方式去增强的目标方法的，所以在不进行增强的时候就可以以很轻松的调用父类的原始方法去执行实现
 				//当前调用的方法和调用的方法是一个方法的时候  就直接调用cglib父类  也就是原始类的创建方法直接创建
 				//当不一样的时候  会进入到下面的方法  直接由beanFactory返回  精妙！！
 				return cglibMethodProxy.invokeSuper(enhancedConfigInstance, beanMethodArgs);
 			}
 			//方法里调用的实例化方法会交给这里来执行
+			//这一步的执行是真正的执行方式，当发现该方法需要代理的时候不调用父类的原始方法
+			//而是调用我需要代理的逻辑去返回一个对象，从而完成对对象的代理
 			return resolveBeanReference(beanMethod, beanMethodArgs, beanFactory, beanName);
 		}
 
