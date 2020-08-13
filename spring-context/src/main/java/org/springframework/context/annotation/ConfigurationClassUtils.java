@@ -187,8 +187,7 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
-	 * Determine whether the given bean definition indicates a full {@code @Configuration}
-	 * class, through checking {@link #checkConfigurationClassCandidate}'s metadata marker.
+	 * 确定给定的b​​ean定义是否表示完整的{@code @Configuration} 类，方法是检查{@link #checkConfigurationClassCandidate}的元数据标记。
 	 */
 	public static boolean isFullConfigurationClass(BeanDefinition beanDef) {
 		return CONFIGURATION_CLASS_FULL.equals(beanDef.getAttribute(CONFIGURATION_CLASS_ATTRIBUTE));

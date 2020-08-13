@@ -28,7 +28,6 @@ public class BeanMethodInterceptor implements ConditionMethodInterceptor, Method
 	}
 
 	private Object cglibProxyLogic(Method method){
-		String name = method.getName();
-		return CglibUtil.getBean(name);
+		return CglibUtil.getBean(method.getName());
 	}
 }

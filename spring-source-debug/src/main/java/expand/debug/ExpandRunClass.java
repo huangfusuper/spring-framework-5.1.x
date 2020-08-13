@@ -14,8 +14,8 @@ public class ExpandRunClass {
 	 */
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(ExpandRunConfig.class);
-		TestServiceImpl bean = annotationConfigApplicationContext.getBean(TestServiceImpl.class);
-		bean.testPrint();
+		ExpandRunConfig bean = annotationConfigApplicationContext.getBean(ExpandRunConfig.class);
+		System.out.println(bean);
 
 	}
 }
