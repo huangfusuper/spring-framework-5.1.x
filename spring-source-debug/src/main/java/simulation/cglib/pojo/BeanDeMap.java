@@ -1,5 +1,10 @@
 package simulation.cglib.pojo;
 
+import java.lang.reflect.Method;
+
+/**
+ * @author huangfu
+ */
 public class BeanDeMap {
 	private String beanFactoryName;
 	/**
@@ -7,7 +12,10 @@ public class BeanDeMap {
 	 */
 	private Class aClass;
 
-	private Class targetClass;
+
+	private Method method;
+
+	private Class beanFactoryClass;
 
 	public String getBeanFactoryName() {
 		return beanFactoryName;
@@ -15,6 +23,14 @@ public class BeanDeMap {
 
 	public void setBeanFactoryName(String beanFactoryName) {
 		this.beanFactoryName = beanFactoryName;
+	}
+
+	public Class getBeanFactoryClass() {
+		return beanFactoryClass;
+	}
+
+	public void setBeanFactoryClass(Class beanFactoryClass) {
+		this.beanFactoryClass = beanFactoryClass;
 	}
 
 	public Class getaClass() {
@@ -25,11 +41,11 @@ public class BeanDeMap {
 		this.aClass = aClass;
 	}
 
-	public Class getTargetClass() {
-		return targetClass;
+	public Method getMethod() {
+		return method;
 	}
 
-	public void setTargetClass(Class targetClass) {
-		this.targetClass = targetClass;
+	public void setMethod(Method method) {
+		this.method = method;
 	}
 }
