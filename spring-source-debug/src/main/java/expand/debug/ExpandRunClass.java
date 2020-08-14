@@ -1,6 +1,8 @@
 package expand.debug;
 
 import expand.config.ExpandRunConfig;
+import expand.config.MyBeanFactoryAware;
+import expand.test.BeanFactoryService;
 import expand.test.impl.TestServiceImpl;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -14,8 +16,7 @@ public class ExpandRunClass {
 	 */
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(ExpandRunConfig.class);
-		ExpandRunConfig bean = annotationConfigApplicationContext.getBean(ExpandRunConfig.class);
-		System.out.println(bean);
-
+		MyBeanFactoryAware.regBean("testBean", BeanFactoryService.class);
+		System.out.println(annotationConfigApplicationContext.getBean(BeanFactoryService.class).print("sadasda"));
 	}
 }

@@ -24,4 +24,9 @@ public class ExpandRunConfig {
 		testService();
 		return new UserServiceImpl();
 	}
+
+	@Bean
+	public MyBeanFactoryAware myBeanFactoryAware(){
+		return new MyBeanFactoryAware();
+	}
 }
