@@ -111,7 +111,9 @@ class ConfigurationClassBeanDefinitionReader {
 	 * 阅读{@code configurationModel}，注册Bean定义 与注册表基于其内容。
 	 */
 	public void loadBeanDefinitions(Set<ConfigurationClass> configurationModel) {
+		//所有配置类和用户自己写的类
 		TrackedConditionEvaluator trackedConditionEvaluator = new TrackedConditionEvaluator();
+		//尝试通过loadBeanDefinitionsFromImportedResources从它加载@ImportResource的配置文件和@Import（xxx.class）来解析配置类并将其转化为bd
 		for (ConfigurationClass configClass : configurationModel) {
 			loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator);
 		}
@@ -138,8 +140,10 @@ class ConfigurationClassBeanDefinitionReader {
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
-
+		// 加载@ImportResource的配置文件
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		// configClass.getImportBeanDefinitionRegistrars()获取需要接下来执行的
+		// @Import(AutoConfigurationImportSelector.class) 来自于@SpringBootApplication中的@EnableAutoConfiguration
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
