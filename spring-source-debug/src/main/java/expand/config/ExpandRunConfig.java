@@ -6,6 +6,7 @@ import expand.test.TestService;
 import expand.test.impl.TestServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * 全局配置类
@@ -21,7 +22,6 @@ public class ExpandRunConfig {
 
 	@Bean
 	public UserService userService() {
-		testService();
 		return new UserServiceImpl();
 	}
 
