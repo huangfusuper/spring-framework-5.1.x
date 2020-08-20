@@ -90,6 +90,7 @@ final class PostProcessorRegistrationDelegate {
 
 			// 首先，调用实现PriorityOrdered(排序接口)的BeanDefinitionRegistryPostProcessors。 这是获取内置bean工厂后置处理器的beanName
 			//查出所有实现了BeanDefinitionRegistryPostProcessor接口的bean名称
+			//调用了一次BeanDefinitionRegistryPostProcessor子类  PriorityOrdered
 			//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
@@ -105,7 +106,7 @@ final class PostProcessorRegistrationDelegate {
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
-			// 接下来，调用实现Ordered的BeanDefinitionRegistryPostProcessors。
+			// 接下来，调用实现Ordered的BeanDefinitionRegistryPostProcessors。   Ordered
 			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
 				if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
