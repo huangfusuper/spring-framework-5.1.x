@@ -266,7 +266,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * {@link Configuration} classes.
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
+		//BeanDefinition 的包装逻辑
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
+		//获取现在为止所有的bd name
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
@@ -320,7 +322,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
-			//解析配置类 这一步就会解析出来对应扫描的bean的bd
+			//解析配置类 这一步就会解析出来对应扫描的bean的bd 这一步事实上就在解析
+			//这里其实挺复杂的 不光是检测 配置类配置的bean 还解析一些 Import之类的注解注入的东西
 			parser.parse(candidates);
 			//校验解析的类
 			parser.validate();

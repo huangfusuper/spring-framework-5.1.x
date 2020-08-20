@@ -91,6 +91,8 @@ final class PostProcessorRegistrationDelegate {
 			// 首先，调用实现PriorityOrdered(排序接口)的BeanDefinitionRegistryPostProcessors。 这是获取内置bean工厂后置处理器的beanName
 			//查出所有实现了BeanDefinitionRegistryPostProcessor接口的bean名称
 			//调用了一次BeanDefinitionRegistryPostProcessor子类  PriorityOrdered
+			//获取 BeanDefinitionRegistryPostProcessor 的子类 事实上 这里只有一个叫做  ConfigurationClassPostProcessor 他实现了 PriorityOrdered接口
+			//BeanFactoryPostProcessor 也就是 ConfigurationClassPostProcessor 会被添加到容器里面
 			//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
@@ -102,7 +104,8 @@ final class PostProcessorRegistrationDelegate {
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
 			registryProcessors.addAll(currentRegistryProcessors);
-			//调用Bean定义注册表后处理器  这里是真正的读取类的bd的一个方法
+			//调用Bean定义注册表后处理器  这里是真正的读取类的bd的一个方法 ConfigurationClassPostProcessor 第一次调用beanFactory 后置处理器
+			//这里调用ConfigurationClassPostProcessor后置处理器会注册一个后置处理器，下面进行回调
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			currentRegistryProcessors.clear();
 
