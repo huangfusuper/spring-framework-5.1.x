@@ -304,15 +304,16 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 
 	/**
-	 * Scan the class path for candidate components.
-	 * @param basePackage the package to check for annotated classes
-	 * @return a corresponding Set of autodetected bean definitions
+	 * 扫描类路径以查找候选组件。
+	 * @param basePackage 包以检查带注释的类
+	 * @return 一组相应的自动检测到的Bean定义
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
 		if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			//通常会进入到这个方法  上面那个判断我会后面说到
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -413,6 +414,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		return candidates;
 	}
 
+	/**
+	 * 这个就是扫描 过滤 转换 class成bd的地方
+	 * @param basePackage 包路径
+	 * @return 转换成功的bd
+	 */
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
@@ -422,6 +428,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
+			//这里开始将对应的类资源文件转换成对应的bd
 			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
@@ -429,14 +436,20 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				if (resource.isReadable()) {
 					try {
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+						//这一步是扫描判断过滤器的
+						//可以通过 addIncludeFilter 添加一些匹配规则
 						if (isCandidateComponent(metadataReader)) {
+							//构建一个扫描bean的定义
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
+							//设置源
 							sbd.setResource(resource);
 							sbd.setSource(resource);
+							//这一步是判断这个是不是 接口等  可以由子类复写
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {
 									logger.debug("Identified candidate component class: " + resource);
 								}
+								//确定是一个候选组件的话就把这个放到候选组件的集合里面
 								candidates.add(sbd);
 							}
 							else {
@@ -466,6 +479,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
 		}
+		//返回 筛选转换的候选bean
 		return candidates;
 	}
 

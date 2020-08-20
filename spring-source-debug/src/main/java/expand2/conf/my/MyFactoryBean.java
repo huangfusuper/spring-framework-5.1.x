@@ -18,6 +18,7 @@ public class MyFactoryBean<T> implements FactoryBean {
 
 	@Override
 	public Object getObject() throws Exception {
+		System.out.println("---------------jdk动态代理-------------");
 		return Proxy.newProxyInstance(MyFactoryBean.class.getClassLoader(),new Class[]{mapperInterface},new MyInvocationHandler());
 	}
 

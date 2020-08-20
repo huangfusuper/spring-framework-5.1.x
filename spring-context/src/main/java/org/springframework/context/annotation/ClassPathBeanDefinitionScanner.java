@@ -243,16 +243,17 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 
 	/**
-	 * Perform a scan within the specified base packages.
-	 * @param basePackages the packages to check for annotated classes
-	 * @return number of beans registered
+	 * 在指定的基本程序包中执行扫描。
+	 * @param basePackages 包以检查带注释的类
+	 * @return 注册的豆数
 	 */
 	public int scan(String... basePackages) {
+		//获取现有的总数  bd
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
-
+		//开始扫描逻辑
 		doScan(basePackages);
 
-		// Register annotation config processors, if necessary.
+		//如有必要，注册注释配置处理器。
 		if (this.includeAnnotationConfig) {
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
@@ -264,34 +265,39 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * 在指定的基本软件包中执行扫描，
 	 * 返回注册的bean定义。
 	 * 此方法不会注册注释配置处理器而是将其留给调用方。
-	 * @param basePackages the packages to check for annotated classes
-	 * @return set of beans registered if any for tooling registration purposes (never {@code null})
+	 * @param basePackages 包以检查带注释的类
+	 * @return 为工具注册目的而已注册的一组bean（决不{@code null}）
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
-			//查找候选组件主要是查找spring的bean  完成扫描的
+			//查找候选组件主要是查找spring的bean  完成扫描的  这个是将传入的包路径下的类（符合条件的） 转换成对应的bd
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			//将查询到的bd进行再一次的过滤和赋值
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				//设置对应的bd类型
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				//检查这个候选的bd
+				//判断当前这个bd是否在对应的容器里面存在  存在的话就对比一下不兼容直接就报错了  不存在就直接返回为true
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-					definitionHolder =
-							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+					definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					//将对应的bd 注册到对应的容器里面
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
 		}
+		//返回本次经过全部流程扫描的bean
 		return beanDefinitions;
 	}
 
@@ -321,17 +327,15 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 
 	/**
-	 * Check the given candidate's bean name, determining whether the corresponding
-	 * bean definition needs to be registered or conflicts with an existing definition.
-	 * @param beanName the suggested name for the bean
-	 * @param beanDefinition the corresponding bean definition
-	 * @return {@code true} if the bean can be registered as-is;
-	 * {@code false} if it should be skipped because there is an
-	 * existing, compatible bean definition for the specified name
-	 * @throws ConflictingBeanDefinitionException if an existing, incompatible
-	 * bean definition has been found for the specified name
+	 * 检查给定候选人的Bean名称，确定是否对应  Bean定义需要注册或与现有定义冲突。
+	 * @param beanName 豆的建议名称
+	 * @param beanDefinition 相应的bean定义
+	 * @return {@code true} Bean是否可以原样注册；
+	 * {@code false} 是否应该跳过，因为有一个 指定名称的现有兼容bean定义
+	 * @throws ConflictingBeanDefinitionException 如果存在，不兼容 已找到指定名称的bean定义
 	 */
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
+		//判断bd是否在 容器里面已经存在了  如果存在了就走下面的逻辑  不存在直接校验完成 返回true
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;
 		}
