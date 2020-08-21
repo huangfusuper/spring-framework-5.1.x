@@ -110,8 +110,8 @@ class ConstructorResolver {
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @param chosenCtors chosen candidate constructors (or {@code null} if none)
-	 * @param explicitArgs argument values passed in programmatically via the getBean method,
-	 * or {@code null} if none (-> use constructor argument values from bean definition)
+	 * @param explicitArgs 通过getBean方法以编程方式传递的参数值，
+	 * 或{@code null}（如果没有）（->使用bean定义中的构造函数参数值）
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
@@ -145,7 +145,7 @@ class ConstructorResolver {
 		}
 
 		if (constructorToUse == null || argsToUse == null) {
-			// Take specified constructors, if any.
+			// 采用指定的构造函数（如果有）。
 			Constructor<?>[] candidates = chosenCtors;
 			if (candidates == null) {
 				Class<?> beanClass = mbd.getBeanClass();
@@ -173,7 +173,7 @@ class ConstructorResolver {
 				}
 			}
 
-			// 需要解析构造函数。
+			// 需要解析构造函数。  需要自动注入
 			boolean autowiring = (chosenCtors != null ||
 					mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 			ConstructorArgumentValues resolvedValues = null;
@@ -183,6 +183,7 @@ class ConstructorResolver {
 				minNrOfArgs = explicitArgs.length;
 			}
 			else {
+				//获取参数值  自动注入的参数值
 				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
 				resolvedValues = new ConstructorArgumentValues();
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
@@ -192,13 +193,13 @@ class ConstructorResolver {
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
 			LinkedList<UnsatisfiedDependencyException> causes = null;
-
+			//遍历所有推断出来的构造方法
 			for (Constructor<?> candidate : candidates) {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
 
 				if (constructorToUse != null && argsToUse != null && argsToUse.length > paramTypes.length) {
-					// Already found greedy constructor that can be satisfied ->
-					// do not look any further, there are only less greedy constructors left.
+					// 已经找到可以满足的贪婪构造函数->
+					// 不要再看了，只剩下更少的贪婪构造函数了。
 					break;
 				}
 				if (paramTypes.length < minNrOfArgs) {
@@ -215,6 +216,7 @@ class ConstructorResolver {
 								paramNames = pnd.getParameterNames(candidate);
 							}
 						}
+						//这一步不出意外应该市重点  因为 这一步很有可能在做参数转换
 						argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, paramNames,
 								getUserDeclaredConstructor(candidate), autowiring, candidates.length == 1);
 					}
@@ -683,8 +685,8 @@ class ConstructorResolver {
 				resolvedValues.addGenericArgumentValue(valueHolder);
 			}
 			else {
-				Object resolvedValue =
-						valueResolver.resolveValueIfNecessary("constructor argument", valueHolder.getValue());
+				//获取自动构建的构造方法参数值
+				Object resolvedValue = valueResolver.resolveValueIfNecessary("constructor argument", valueHolder.getValue());
 				ConstructorArgumentValues.ValueHolder resolvedValueHolder = new ConstructorArgumentValues.ValueHolder(
 						resolvedValue, valueHolder.getType(), valueHolder.getName());
 				resolvedValueHolder.setSource(valueHolder);
@@ -714,21 +716,22 @@ class ConstructorResolver {
 		for (int paramIndex = 0; paramIndex < paramTypes.length; paramIndex++) {
 			Class<?> paramType = paramTypes[paramIndex];
 			String paramName = (paramNames != null ? paramNames[paramIndex] : "");
-			// Try to find matching constructor argument value, either indexed or generic.
+			// 尝试查找匹配的构造函数参数值，无论是索引的还是通用的。
 			ConstructorArgumentValues.ValueHolder valueHolder = null;
 			if (resolvedValues != null) {
 				valueHolder = resolvedValues.getArgumentValue(paramIndex, paramType, paramName, usedValueHolders);
-				// If we couldn't find a direct match and are not supposed to autowire,
-				// let's try the next generic, untyped argument value as fallback:
-				// it could match after type conversion (for example, String -> int).
+				// 如果我们找不到直接匹配项并且不应该自动连线，
+				// 让我们尝试下一个通用的，无类型的参数值作为后备：
+				// 类型转换后它可以匹配（例如，String-> int）。
 				if (valueHolder == null && (!autowiring || paramTypes.length == resolvedValues.getArgumentCount())) {
 					valueHolder = resolvedValues.getGenericArgumentValue(null, null, usedValueHolders);
 				}
 			}
 			if (valueHolder != null) {
-				// We found a potential match - let's give it a try.
-				// Do not consider the same value definition multiple times!
+				// 我们找到了可能的比赛-让我们尝试一下。
+				// 不要多次考虑相同的值定义！
 				usedValueHolders.add(valueHolder);
+				//这里获取你设置的参数值
 				Object originalValue = valueHolder.getValue();
 				Object convertedValue;
 				if (valueHolder.isConverted()) {

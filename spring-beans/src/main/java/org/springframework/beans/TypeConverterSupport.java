@@ -63,6 +63,15 @@ public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport
 				(field != null ? new TypeDescriptor(field) : TypeDescriptor.valueOf(requiredType)));
 	}
 
+	/**
+	 * 必要时进行转换
+	 * @param value 要转换的值
+	 * @param requiredType 我们必须转换为的类型 （如果未知，则为{@code null}，例如在使用collection元素的情况下）
+	 * @param typeDescriptor 要使用的类型描述符（可以为{@code null}）
+	 * @param <T>
+	 * @return
+	 * @throws TypeMismatchException
+	 */
 	@Nullable
 	@Override
 	public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,

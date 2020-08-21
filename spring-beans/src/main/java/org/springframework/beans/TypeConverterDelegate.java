@@ -115,12 +115,12 @@ class TypeConverterDelegate {
 	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
 			@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
-		// Custom editor for this type?
+		// 此类型的自定义编辑器？
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
 		ConversionFailedException conversionAttemptEx = null;
 
-		// No custom editor but custom ConversionService specified?
+		// 没有自定义编辑器，但指定了自定义ConversionService？
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
 		if (editor == null && conversionService != null && newValue != null && typeDescriptor != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
@@ -341,15 +341,13 @@ class TypeConverterDelegate {
 	}
 
 	/**
-	 * Convert the value to the required type (if necessary from a String),
-	 * using the given property editor.
-	 * @param oldValue the previous value, if available (may be {@code null})
-	 * @param newValue the proposed new value
-	 * @param requiredType the type we must convert to
-	 * (or {@code null} if not known, for example in case of a collection element)
-	 * @param editor the PropertyEditor to use
-	 * @return the new value, possibly the result of type conversion
-	 * @throws IllegalArgumentException if type conversion failed
+	 * 将值转换为所需的类型（如果需要，则从字符串）， 使用给定的属性编辑器。
+	 * @param oldValue 先前的值（如果有）（可能为{@code null}）
+	 * @param newValue 建议的新价值
+	 * @param requiredType 我们必须转换为的类型 （如果未知，则为{@code null}，例如在使用collection元素的情况下）
+	 * @param editor 要使用的PropertyEditor
+	 * @return 新值，可能是类型转换的结果
+	 * @throws IllegalArgumentException 如果类型转换失败
 	 */
 	@Nullable
 	private Object doConvertValue(@Nullable Object oldValue, @Nullable Object newValue,
@@ -358,10 +356,10 @@ class TypeConverterDelegate {
 		Object convertedValue = newValue;
 
 		if (editor != null && !(convertedValue instanceof String)) {
-			// Not a String -> use PropertyEditor's setValue.
-			// With standard PropertyEditors, this will return the very same object;
-			// we just want to allow special PropertyEditors to override setValue
-			// for type conversion from non-String values to the required type.
+			// 不是字符串->使用PropertyEditor的setValue。
+			// 使用标准的PropertyEditor，这将返回完全相同的对象。
+			// 我们只想允许特殊的PropertyEditor覆盖setValue
+			// 用于将非字符串值转换为所需类型的类型。
 			try {
 				editor.setValue(convertedValue);
 				Object newConvertedValue = editor.getValue();
@@ -394,7 +392,7 @@ class TypeConverterDelegate {
 
 		if (convertedValue instanceof String) {
 			if (editor != null) {
-				// Use PropertyEditor's setAsText in case of a String value.
+				// 如果为String值，请使用PropertyEditor的setAsText。
 				if (logger.isTraceEnabled()) {
 					logger.trace("Converting String to [" + requiredType + "] using property editor [" + editor + "]");
 				}
@@ -424,8 +422,9 @@ class TypeConverterDelegate {
 			if (logger.isDebugEnabled()) {
 				logger.debug("PropertyEditor [" + editor.getClass().getName() + "] does not support setValue call", ex);
 			}
-			// Swallow and proceed.
+			// 吞下并继续。
 		}
+		//这里貌似将String类型的参数转换了
 		editor.setAsText(newTextValue);
 		return editor.getValue();
 	}
