@@ -137,7 +137,7 @@ class TypeConverterDelegate {
 
 		Object convertedValue = newValue;
 
-		// Value not of required type?
+		// 值不是必需的类型？  class会在这判断成功
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
 					convertedValue instanceof String) {
@@ -158,7 +158,7 @@ class TypeConverterDelegate {
 		boolean standardConversion = false;
 
 		if (requiredType != null) {
-			// Try to apply some standard type conversion rules if appropriate.
+			// 如果合适，请尝试应用一些标准类型转换规则。
 
 			if (convertedValue != null) {
 				if (Object.class == requiredType) {
