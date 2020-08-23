@@ -1,7 +1,6 @@
 package com.debug;
 
-import com.aop.SpringAopConfig;
-import com.aop.service.AopService;
+import com.conf.SpringDebugConfig;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 public class SpringDebug {
 	public static void main(String[] args) throws InterruptedException {
-		AnnotationConfigApplicationContext app = new AnnotationConfigApplicationContext(SpringAopConfig.class);
-		System.out.println(app.getBean(AopService.class).testAop("asd"));
+		AnnotationConfigApplicationContext app = new AnnotationConfigApplicationContext(SpringDebugConfig.class);
 	}
 }

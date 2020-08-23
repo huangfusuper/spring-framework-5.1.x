@@ -140,6 +140,8 @@ class ConfigurationClassBeanDefinitionReader {
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
+
+		//以下的方法会调用对应的处理器处理 一个是xml方式的导入 一个是使用 ImportBeanDefinitionRegistrar 的接口注册的一个db实体
 		// 加载@ImportResource的配置文件
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
 		// configClass.getImportBeanDefinitionRegistrars()获取需要接下来执行的
@@ -362,8 +364,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
-		registrars.forEach((registrar, metadata) ->
-				registrar.registerBeanDefinitions(metadata, this.registry));
+		registrars.forEach((registrar, metadata) -> registrar.registerBeanDefinitions(metadata, this.registry));
 	}
 
 

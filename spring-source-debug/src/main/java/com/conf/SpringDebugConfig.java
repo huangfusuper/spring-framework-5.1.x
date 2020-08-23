@@ -14,7 +14,6 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  */
 @Configuration
 @ComponentScan(basePackages = {"com.service","com.aop"})
-@EnableAspectJAutoProxy
 public class SpringDebugConfig {
 
 	//@Bean
@@ -33,15 +32,14 @@ public class SpringDebugConfig {
 	 *
 	 *
 	 */
-	//@Bean
+	@Bean
 	public ClassPathBeanDefinitionScanner classPathBeanDefinitionScanner(ApplicationContext  applicationContext){
 		AnnotationConfigApplicationContext annotationConfigApplicationContext = (AnnotationConfigApplicationContext) applicationContext;
 		ClassPathBeanDefinitionScanner classPathBeanDefinitionScanner = new ClassPathBeanDefinitionScanner(annotationConfigApplicationContext);
 		MyScanner myScanner = new MyScanner(annotationConfigApplicationContext);
-
-		myScanner.addIncludeFilter(new AnnotationTypeFilter(CustomizeScannerAnnotation.class));
-		myScanner.scan("com");
 		myScanner.addIncludeFilter((e,e1) ->true);
+		myScanner.scan("com.service");
+
 		return myScanner;
 	}
 }

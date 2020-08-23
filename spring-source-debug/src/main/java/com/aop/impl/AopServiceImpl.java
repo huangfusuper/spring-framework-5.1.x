@@ -3,9 +3,6 @@ package com.aop.impl;
 import com.aop.AopService;
 import com.conf.annotations.AopAnnotation;
 import org.springframework.stereotype.Component;
-
-@Component
-
 public class AopServiceImpl implements AopService {
 
 	@AopAnnotation
