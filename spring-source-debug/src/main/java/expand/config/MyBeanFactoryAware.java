@@ -24,10 +24,8 @@ public class MyBeanFactoryAware implements BeanFactoryAware {
 		AbstractBeanDefinition beanDefinition = beanDefinitionBuilder.getBeanDefinition();
 		beanDefinition.setAutowireMode(2);
 		beanDefinition.setPrimary(true);
-		beanDefinition.setSynthetic(true);
-//        beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		beanDefinition.setSynthetic(false);
 		beanDefinition.setScope("singleton");
-		beanDefinition.setRole(0);
 		DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) beanFactory;
 		defaultListableBeanFactory.registerBeanDefinition(beanName,beanDefinition);
 	}
