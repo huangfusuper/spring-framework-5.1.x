@@ -429,16 +429,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 
-		// No singleton instance found -> check bean definition.
+		// 找不到单例实例->检查bean定义。
 		BeanFactory parentBeanFactory = getParentBeanFactory();
 		if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
-			// No bean definition found in this factory -> delegate to parent.
+			// 在此工厂中找不到bean定义->委托给父对象。
 			return parentBeanFactory.isSingleton(originalBeanName(name));
 		}
 
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
-		// In case of FactoryBean, return singleton status of created object if not a dereference.
+		// 对于FactoryBean，如果不是取消引用，则返回创建对象的单例状态。
 		if (mbd.isSingleton()) {
 			if (isFactoryBean(beanName, mbd)) {
 				if (BeanFactoryUtils.isFactoryDereference(name)) {
@@ -462,18 +462,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		BeanFactory parentBeanFactory = getParentBeanFactory();
 		if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
-			// No bean definition found in this factory -> delegate to parent.
+			// 在此工厂中找不到bean定义->委托给父对象。
 			return parentBeanFactory.isPrototype(originalBeanName(name));
 		}
 
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		if (mbd.isPrototype()) {
-			// In case of FactoryBean, return singleton status of created object if not a dereference.
+			// 对于FactoryBean，如果不是取消引用，则返回创建对象的单例状态。
 			return (!BeanFactoryUtils.isFactoryDereference(name) || isFactoryBean(beanName, mbd));
 		}
 
-		// Singleton or scoped - not a prototype.
-		// However, FactoryBean may still produce a prototype object...
+		// 单例或示波器-不是原型。 但是，FactoryBean可能仍会产生原型对象。
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			return false;
 		}
