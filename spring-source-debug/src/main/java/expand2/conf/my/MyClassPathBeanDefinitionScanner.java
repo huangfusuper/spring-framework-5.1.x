@@ -56,7 +56,9 @@ public class MyClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionSca
 	 */
 	@Override
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+		//获取BeanDefinition的详细信息
 		AnnotationMetadata metadata = beanDefinition.getMetadata();
+		//判断第一是一个完整的类  而且是一个接口的情况下就会被加载  MyBatis是接口的形式嘛
 		return metadata.isInterface() && metadata.isIndependent();
 	}
 
