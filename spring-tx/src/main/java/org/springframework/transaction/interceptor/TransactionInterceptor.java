@@ -52,8 +52,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
 
 	/**
-	 * Create a new TransactionInterceptor.
-	 * <p>Transaction manager and transaction attributes still need to be set.
+	 * 创建一个新的TransactionInterceptor。
+	 * <p>仍然需要设置事务管理器和事务属性。
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributes(java.util.Properties)
 	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
@@ -62,9 +62,9 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	}
 
 	/**
-	 * Create a new TransactionInterceptor.
-	 * @param ptm the default transaction manager to perform the actual transaction management
-	 * @param attributes the transaction attributes in properties format
+	 * 创建一个新的TransactionInterceptor。
+	 * @param ptm 默认事务管理器执行实际的事务管理
+	 * @param attributes 属性格式的交易属性
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributes(java.util.Properties)
 	 */
@@ -74,9 +74,9 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	}
 
 	/**
-	 * Create a new TransactionInterceptor.
-	 * @param ptm the default transaction manager to perform the actual transaction management
-	 * @param tas the attribute source to be used to find transaction attributes
+	 * 创建一个新的TransactionInterceptor。
+	 * @param ptm 默认事务管理器执行实际的事务管理
+	 * @param tas 用于查找交易属性的属性源
 	 * @see #setTransactionManager
 	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
 	 */
@@ -89,12 +89,11 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	@Override
 	@Nullable
 	public Object invoke(MethodInvocation invocation) throws Throwable {
-		// Work out the target class: may be {@code null}.
-		// The TransactionAttributeSource should be passed the target class
-		// as well as the method, which may be from an interface.
+		// 计算目标类别：可以为{@code null}。
+		// TransactionAttributeSource应该传递给目标类 以及方法（可能来自接口）。
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
-		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
+		// 适应TransactionAspectSupport的invokeWithinTransaction ...
 		return invokeWithinTransaction(invocation.getMethod(), targetClass, invocation::proceed);
 	}
 
@@ -104,10 +103,10 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	//---------------------------------------------------------------------
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
-		// Rely on default serialization, although this class itself doesn't carry state anyway...
+		// 依靠默认的序列化，尽管此类本身也不携带状态。
 		oos.defaultWriteObject();
 
-		// Deserialize superclass fields.
+		// 反序列化超类字段。
 		oos.writeObject(getTransactionManagerBeanName());
 		oos.writeObject(getTransactionManager());
 		oos.writeObject(getTransactionAttributeSource());
