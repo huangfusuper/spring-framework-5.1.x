@@ -21,9 +21,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.lang.Nullable;
 
 /**
- * Auto-proxy creator that considers infrastructure Advisor beans only,
- * ignoring any application-defined Advisors.
- *
+ * 一般来说 Spring的AOP是由后置处理器（postProcessAfterInitialization）完成的 但是当前这个类显然是没有的
+ * 那么肯定在父类里面
  * @author Juergen Hoeller
  * @since 2.0.7
  */
