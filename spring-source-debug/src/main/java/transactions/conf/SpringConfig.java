@@ -2,6 +2,8 @@ package transactions.conf;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -19,6 +21,7 @@ import java.sql.DriverManager;
  */
 @Configuration
 @EnableTransactionManagement
+@ComponentScan({"transactions.service","transactions.mapper"})
 public class SpringConfig {
 	@Bean
 	public DataSource dataSource() {

@@ -265,9 +265,9 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 
 	/**
-	 * General delegate for around-advice-based subclasses, delegating to several other template
-	 * methods on this class. Able to handle {@link CallbackPreferringPlatformTransactionManager}
-	 * as well as regular {@link PlatformTransactionManager} implementations.
+	 * 基于建议的子类的一般委托，委托给其他几个模板
+	 * 此类的方法。能够处理{@link CallbackPreferringPlatformTransactionManager}
+	 * 以及常规的{@link PlatformTransactionManager}实现。
 	 * @param method the Method being invoked
 	 * @param targetClass the target class that we're invoking the method on
 	 * @param invocation the callback to use for proceeding with the target invocation
@@ -278,30 +278,34 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	protected Object invokeWithinTransaction(Method method, @Nullable Class<?> targetClass,
 			final InvocationCallback invocation) throws Throwable {
 
-		// If the transaction attribute is null, the method is non-transactional.
+		// 如果transaction属性为null，则该方法为非事务处理。
 		TransactionAttributeSource tas = getTransactionAttributeSource();
 		final TransactionAttribute txAttr = (tas != null ? tas.getTransactionAttribute(method, targetClass) : null);
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
 		if (txAttr == null || !(tm instanceof CallbackPreferringPlatformTransactionManager)) {
-			// Standard transaction demarcation with getTransaction and commit/rollback calls.
+			// 使用getTransaction和commit / rollback调用进行标准事务划分。
+			// 开启事务,底层会启用jdbc开启事务,
 			TransactionInfo txInfo = createTransactionIfNecessary(tm, txAttr, joinpointIdentification);
-
+			// 目标方法返回值
 			Object retVal;
 			try {
-				// This is an around advice: Invoke the next interceptor in the chain.
-				// This will normally result in a target object being invoked.
+				// 这是一个建议：调用链中的下一个拦截器。
+				// 通常，这将导致目标对象被调用。
+				//这是重新回去 拿到最终的返回值 处理完成之后本代理节点完成
 				retVal = invocation.proceedWithInvocation();
 			}
 			catch (Throwable ex) {
-				// target invocation exception
+				// 如果目标方法抛出异常,这里会回滚事务
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
 			}
 			finally {
+				// 清埋事务
 				cleanupTransactionInfo(txInfo);
 			}
+			//返回后提交事务
 			commitTransactionAfterReturning(txInfo);
 			return retVal;
 		}
@@ -680,7 +684,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * Concrete interceptors/aspects adapt this to their invocation mechanism.
 	 */
 	@FunctionalInterface
-	protected interface InvocationCallback {
+	public interface InvocationCallback {
 
 		Object proceedWithInvocation() throws Throwable;
 	}
