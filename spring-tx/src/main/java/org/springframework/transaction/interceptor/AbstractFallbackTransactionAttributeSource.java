@@ -108,9 +108,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			}
 		}
 		else {
-			// We need to work it out.
+			//我们需要解决。
 			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
-			// Put it in the cache.
+			// 将其放入缓存中。
 			if (txAttr == null) {
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
 			}

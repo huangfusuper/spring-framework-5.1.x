@@ -211,24 +211,22 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Can the given pointcut apply at all on the given class?
-	 * <p>This is an important test as it can be used to optimize
-	 * out a pointcut for a class.
-	 * @param pc the static or dynamic pointcut to check
-	 * @param targetClass the class to test
-	 * @param hasIntroductions whether or not the advisor chain
-	 * for this bean includes any introductions
-	 * @return whether the pointcut can apply on any method
+	 * 给定的切入点可以完全应用于给定的类吗？
+	 * <p>这是一项重要的测试，因为它可以用于优化类的切入点。
+	 * @param pc 的静态或动态切入点进行检查
+	 * @param targetClass 测试班
+	 * @param hasIntroductions 顾问链是否这个bean包括任何介绍
+	 * @return 切入点是否可以应用于任何方法
 	 */
 	public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(pc, "Pointcut must not be null");
 		if (!pc.getClassFilter().matches(targetClass)) {
 			return false;
 		}
-
+		//获取方法匹配器
 		MethodMatcher methodMatcher = pc.getMethodMatcher();
 		if (methodMatcher == MethodMatcher.TRUE) {
-			// No need to iterate the methods if we're matching any method anyway...
+			// 如果我们仍然要匹配任何方法，则无需迭代方法...
 			return true;
 		}
 
@@ -239,13 +237,16 @@ public abstract class AopUtils {
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
 		if (!Proxy.isProxyClass(targetClass)) {
+			//获取实现类
 			classes.add(ClassUtils.getUserClass(targetClass));
 		}
+		//获取接口
 		classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
-
+		//为啥会添加接口？因为切面方法有的是基于类的有的是基于接口的  所以要获取该类的所由接口和实现  然后注意判断是否需要被代理
 		for (Class<?> clazz : classes) {
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {
+				//这一步的判断尤为重要  他是判断最终的方法能否呗切面切到
 				if (introductionAwareMethodMatcher != null ?
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
 						methodMatcher.matches(method, targetClass)) {
@@ -270,14 +271,13 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Can the given advisor apply at all on the given class?
-	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
-	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
-	 * @param advisor the advisor to check
-	 * @param targetClass class we're testing
-	 * @param hasIntroductions whether or not the advisor chain for this bean includes
-	 * any introductions
-	 * @return whether the pointcut can apply on any method
+	 * 给定的顾问完全可以申请给定班级吗？
+	 * <p>这是一项重要的测试，因为它可以用于优化课程的顾问。
+	 * 此版本还考虑了介绍（对于IntroductionAwareMethodMatchers）。
+	 * @param advisor 顾问检查
+	 * @param targetClass 我们正在测试的课程
+	 * @param hasIntroductions 此bean的顾问链是否包括任何介绍
+	 * @return 切入点是否可以应用于任何方法
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
 		if (advisor instanceof IntroductionAdvisor) {
@@ -288,24 +288,23 @@ public abstract class AopUtils {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {
-			// It doesn't have a pointcut so we assume it applies.
+			// 它没有切入点，因此我们假设它适用。
 			return true;
 		}
 	}
 
 	/**
-	 * Determine the sublist of the {@code candidateAdvisors} list
-	 * that is applicable to the given class.
-	 * @param candidateAdvisors the Advisors to evaluate
-	 * @param clazz the target class
-	 * @return sublist of Advisors that can apply to an object of the given class
-	 * (may be the incoming List as-is)
+	 * 确定{@code candidateAdvisors}列表的子列表 适用于给定的类别。
+	 * @param candidateAdvisors 顾问进行评估
+	 * @param clazz 目标阶层
+	 * @return 可应用于给定类的对象的Advisor子列表 （可能是原样的传入列表）
 	 */
 	public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz) {
 		if (candidateAdvisors.isEmpty()) {
 			return candidateAdvisors;
 		}
 		List<Advisor> eligibleAdvisors = new ArrayList<>();
+		//遍历所有的通知类
 		for (Advisor candidate : candidateAdvisors) {
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
@@ -317,6 +316,7 @@ public abstract class AopUtils {
 				// already processed
 				continue;
 			}
+			//循环遍历 一个一个代理切面循环 诸葛和这个类里面所由的方法作对比 看是否能够被代理
 			if (canApply(candidate, clazz, hasIntroductions)) {
 				eligibleAdvisors.add(candidate);
 			}

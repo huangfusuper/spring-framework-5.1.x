@@ -86,6 +86,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+		//寻找到所有的Advisor 类
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		extendAdvisors(eligibleAdvisors);
@@ -105,19 +106,19 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Search the given candidate Advisors to find all Advisors that
-	 * can apply to the specified bean.
-	 * @param candidateAdvisors the candidate Advisors
-	 * @param beanClass the target's bean class
-	 * @param beanName the target's bean name
-	 * @return the List of applicable Advisors
+	 * 搜索给定的候选顾问以查找所有符合条件的顾问可以应用于指定的bean。
+	 * @param candidateAdvisors 所有候选的通知类
+	 * @param beanClass 目标的Bean类
+	 * @param beanName 目标的bean名称
+	 * @return 符合条件的通知类
 	 * @see ProxyCreationContext#getCurrentProxiedBeanName()
 	 */
 	protected List<Advisor> findAdvisorsThatCanApply(
 			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
-
+		//设置当前代理类的名称
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
+			//开始寻找当前能够代理这个bean的通知类
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
 		}
 		finally {

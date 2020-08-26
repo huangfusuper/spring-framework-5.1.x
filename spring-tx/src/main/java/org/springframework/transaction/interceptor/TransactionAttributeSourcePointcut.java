@@ -26,8 +26,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Inner class that implements a Pointcut that matches if the underlying
- * {@link TransactionAttributeSource} has an attribute for a given method.
+ * 实现一个Pointcut的内部类，如果基础
+ * {@link TransactionAttributeSource} 具有给定方法的属性.
  *
  * @author Juergen Hoeller
  * @since 2.5.5
