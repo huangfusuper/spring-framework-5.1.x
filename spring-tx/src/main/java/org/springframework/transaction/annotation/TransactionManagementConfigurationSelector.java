@@ -42,12 +42,13 @@ public class TransactionManagementConfigurationSelector extends AdviceModeImport
 	 * {@code AspectJ(Jta)TransactionManagementConfiguration} for {@code PROXY}
 	 * and {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()},
 	 * respectively.
+	 * 一个接口的回调 通过这个方法返回类的全限定名称  然后被Spring回调最终进行了处理
 	 */
 	@Override
 	protected String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:
-				// 默认就是Proxy模式
+				// 默认就是Proxy模式  AutoProxyRegistrar 导入AOP的处理器   ProxyTransactionManagementConfiguration 导入一个拦截器
 				return new String[] {AutoProxyRegistrar.class.getName(),
 						ProxyTransactionManagementConfiguration.class.getName()};
 			case ASPECTJ:

@@ -152,6 +152,7 @@ import org.springframework.core.Ordered;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+//这个极其重要  这个Import是导入了一个 AOP的处理器 和 一个 对于事务的拦截器
 @Import(TransactionManagementConfigurationSelector.class)
 public @interface EnableTransactionManagement {
 

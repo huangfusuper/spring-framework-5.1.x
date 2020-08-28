@@ -48,7 +48,7 @@ import org.springframework.core.type.AnnotationMetadata;
 public interface ImportSelector {
 
 	/**
-	 * Select and return the names of which class(es) should be imported based on
+	 * 选择并返回应基于哪个类别导入的名称
 	 * the {@link AnnotationMetadata} of the importing @{@link Configuration} class.
 	 */
 	String[] selectImports(AnnotationMetadata importingClassMetadata);
