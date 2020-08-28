@@ -79,7 +79,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	/** We use a static Log to avoid serialization issues. */
 	private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
 
-	/** Config used to configure this proxy. */
+	/** 用于配置此代理的配置  这配置是在创建jdk动态代理 也就是new 的环节就已经被创建出来了  很舒服. */
 	private final AdvisedSupport advised;
 
 	/**
@@ -104,6 +104,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
+		//这里被创建的
 		this.advised = config;
 	}
 
@@ -199,13 +200,17 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 			// 获取此方法的拦截链。
 			//这个拦截链条是对应的bean能够使用的所有的切点方法
+			//这里就是上面筛选出来所有的通知类的责任链
+			//org/springframework/aop/framework/autoproxy/AbstractAutoProxyCreator.java:366 注入进来的
 			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
 			// 检查我们是否有任何建议。如果我们不这样做，我们可以退回直接 目标的反射调用，并避免创建MethodInvocation。
 			//拦截连如果没有的话会直接执行对应的方法
+			//存在失误的情况下，对应的处理链肯定没有响应的通知切点 所以会进入到这里面
 			if (chain.isEmpty()) {
 				//跳过创建MethodInvocation的方法：直接调用目标 请注意，最终调用者必须是InvokerInterceptor，这里只是对目标的反射操作，没有热插拔或花哨的代理。
 				Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+				//反射调用这些连接点
 				retVal = AopUtils.invokeJoinpointUsingReflection(target, method, argsToUse);
 			}
 			else {

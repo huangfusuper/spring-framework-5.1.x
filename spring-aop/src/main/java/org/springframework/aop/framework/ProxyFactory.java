@@ -105,7 +105,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return 代理对象
 	 */
 	public Object getProxy(@Nullable ClassLoader classLoader) {
-		//createAopProxy返回使用的代理类型
+		//createAopProxy返回使用的代理类型   注意在这个方法里面传入了一个this 这个有大用
 		//getProxy使用返回的代理类型创建代理对象
 		return createAopProxy().getProxy(classLoader);
 	}

@@ -103,6 +103,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 			activate();
 		}
 		//使用之前创建的工厂选取一个代理方式  究竟是jdk还是cglib
+		//注意这个this 他是 ProxyCreatorSupport
 		return getAopProxyFactory().createAopProxy(this);
 	}
 

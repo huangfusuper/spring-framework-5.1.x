@@ -88,7 +88,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
 		//寻找到所有的Advisor 类
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		//少选符合条件的通知类
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
+		//空翻方  扩展点可以扩展实现已经筛选好的通知类
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
@@ -127,20 +129,19 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
-	 * Return whether the Advisor bean with the given name is eligible
-	 * for proxying in the first place.
-	 * @param beanName the name of the Advisor bean
-	 * @return whether the bean is eligible
+	 * 返回具有给定名称的Advisor bean是否合格首先要进行代理。
+	 * @param beanName Advisor bean的名称
+	 * @return 豆是否符合条件
 	 */
 	protected boolean isEligibleAdvisorBean(String beanName) {
 		return true;
 	}
 
 	/**
-	 * Sort advisors based on ordering. Subclasses may choose to override this
-	 * method to customize the sorting strategy.
-	 * @param advisors the source List of Advisors
-	 * @return the sorted List of Advisors
+	 * 根据级别对通知进行排序。子类可以选择重写
+	 * 自定义排序策略的方法。
+	 * @param advisors 通知列表
+	 * @return 排序的通知列表
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.annotation.Order
 	 * @see org.springframework.core.annotation.AnnotationAwareOrderComparator

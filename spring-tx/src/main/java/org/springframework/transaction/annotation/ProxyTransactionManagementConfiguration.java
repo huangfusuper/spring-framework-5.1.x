@@ -66,6 +66,8 @@ public class ProxyTransactionManagementConfiguration extends AbstractTransaction
 	@Bean
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public TransactionInterceptor transactionInterceptor() {
+		//这一步就是实际意义上的事务拦截器  最终会进入到这里面 执行对DB事务的管理
+		//这个类被包装在 BeanFactoryTransactionAttributeSourceAdvisor 的  setAdvice 里面
 		TransactionInterceptor interceptor = new TransactionInterceptor();
 		interceptor.setTransactionAttributeSource(transactionAttributeSource());
 		if (this.txManager != null) {

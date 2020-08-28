@@ -94,12 +94,12 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 			return null;
 		}
 
-		// First, see if we have a cached value.
+		// 首先，看看我们是否有一个缓存的值。
 		Object cacheKey = getCacheKey(method, targetClass);
 		TransactionAttribute cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
-			// Value will either be canonical value indicating there is no transaction attribute,
-			// or an actual transaction attribute.
+			// 值将是表示没有交易属性的规范值，
+			// 或实际交易属性。
 			if (cached == NULL_TRANSACTION_ATTRIBUTE) {
 				return null;
 			}
