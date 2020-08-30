@@ -23,9 +23,7 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.util.ClassUtils;
 
 /**
- * Selects which implementation of {@link AbstractTransactionManagementConfiguration}
- * should be used based on the value of {@link EnableTransactionManagement#mode} on the
- * importing {@code @Configuration} class.
+ * 选择{@link AbstractTransactionManagementConfiguration}的实现应该根据{@link EnableTransactionManagement＃mode}在导入{@code @Configuration}类。
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -38,17 +36,15 @@ import org.springframework.util.ClassUtils;
 public class TransactionManagementConfigurationSelector extends AdviceModeImportSelector<EnableTransactionManagement> {
 
 	/**
-	 * Returns {@link ProxyTransactionManagementConfiguration} or
-	 * {@code AspectJ(Jta)TransactionManagementConfiguration} for {@code PROXY}
-	 * and {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()},
-	 * respectively.
 	 * 一个接口的回调 通过这个方法返回类的全限定名称  然后被Spring回调最终进行了处理
 	 */
 	@Override
 	protected String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:
-				// 默认就是Proxy模式  AutoProxyRegistrar 导入AOP的处理器   ProxyTransactionManagementConfiguration 导入一个拦截器
+				// 默认就是Proxy模式
+				// AutoProxyRegistrar 导入AOP的处理器
+				// ProxyTransactionManagementConfiguration 导入一个拦截器
 				return new String[] {AutoProxyRegistrar.class.getName(),
 						ProxyTransactionManagementConfiguration.class.getName()};
 			case ASPECTJ:

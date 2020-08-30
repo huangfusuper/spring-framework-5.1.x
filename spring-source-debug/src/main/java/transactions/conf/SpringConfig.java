@@ -26,7 +26,6 @@ public class SpringConfig {
 	@Bean
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
 		dataSource.setUsername("root");
 		dataSource.setPassword("123456");
 		String url = "jdbc:mysql://10.0.10.118:3306/yf1?serverTimezone=UTC&characterEncoding=utf8&useUnicode=true&useSSL=false";
@@ -35,13 +34,10 @@ public class SpringConfig {
 
 		return dataSource;
 	}
-
-
 	@Bean
 	public JdbcTemplate jdbcTemplate(DataSource dataSource) {
 		return new JdbcTemplate(dataSource);
 	}
-
 	@Bean
 	public PlatformTransactionManager txManager(DataSource dataSource) {
 		return new DataSourceTransactionManager(dataSource);

@@ -363,6 +363,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		//这里就是寻找这个bean的切点的  寻找对应的AOP代理
 		//这个也是难点 他是如何寻找到该bean对应的切点的呢？
 		//获取当前对象所有适用的Advisor.找到所有切点是他的对应的@Aspect注解的类
+		//它主要使用的就是 第一步时获取所有的切面方法也就是  Advisor.class 类型的类
+		//使用当前类一个一个的循环判断是否使用当前这个类
+		//适用就添加到数组，不适应就下一个！
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
 			//如果是允许代理的话
