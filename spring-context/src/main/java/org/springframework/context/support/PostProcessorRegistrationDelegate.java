@@ -96,57 +96,86 @@ final class PostProcessorRegistrationDelegate {
 			//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				//判断当前这个类是不是实现了PriorityOrdered接口
 				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 					//getBean会提前走生命周期
  					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+ 					//将这个已经处理过的添加到集合里面
+					//为什么要天机哀悼集合里面呢？因为本身他就属于 BeanDefinitionRegistryPostProcessor 是 BeanFactoryPostProcessor的子类
+					//那么肯定 在执行BeanFactoryPostProcessor的回调的时候，他还会再次的被获取执行
+					//索性 Spring为了节省效率，避免这部分 BeanDefinitionRegistryPostProcessor类被重复 获取，就在完全调用了BeanDefinitionRegistryPostProcessor类之后
+					//将这一部分的接口直接给执行了也就是BeanDefinitionRegistryPostProcessor的BeanFactoryPostProcessor的回调方法是优先于直接实现BeanFactoryPostProcessor方法的
+					//既然在执行BeanFactoryPostProcessor之前就执行了对应的方法回调，那么肯定，执行BeanFactoryPostProcessor的时候要把之前已经执行过的过滤掉
+					//故而会将BeanDefinitionRegistryPostProcessor存储起来，后续执行BeanFactoryPostProcessor会跳过集合里面的类
 					processedBeans.add(ppName);
 				}
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			//见该处理器添加到对应的已注册集合里面 方面后面直接回调他们的父类方法也就是  BeanFactoryPostProcessors方法
 			registryProcessors.addAll(currentRegistryProcessors);
 			//调用Bean定义注册表后处理器  这里是真正的读取类的bd的一个方法 ConfigurationClassPostProcessor 第一次调用beanFactory 后置处理器
 			//这里调用ConfigurationClassPostProcessor后置处理器会注册一个后置处理器，下面进行回调
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			//清空当前这个处理器
 			currentRegistryProcessors.clear();
 
 			// 接下来，调用实现Ordered的BeanDefinitionRegistryPostProcessors。   Ordered
 			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				//判断当前这个类是不是实现了Ordered接口
 				if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
+					//getBean会提前走生命周期
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
 			}
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			//见该处理器添加到对应的已注册集合里面 方面后面直接回调他们的父类方法也就是  BeanFactoryPostProcessors方法
 			registryProcessors.addAll(currentRegistryProcessors);
+			//调用当前的BeanDefinitionRegistryPostProcessor 回调方法
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			//清空当前这个处理器
 			currentRegistryProcessors.clear();
 
 			// 最后，调用所有其他BeanDefinitionRegistryPostProcessor，直到没有其他的出现。
 			boolean reiterate = true;
+			//这里为什么是死循环呢？
+			//因为 BeanDefinitionRegistryPostProcessor 本身进行回调的时候会手动注册一些特殊的类，例如再次注册一个BeanDefinitionRegistryPostProcessor
+			//类，可能手动注册的类里面还有，像套娃一样，故而需要进行不断的循环迭代获取，从而达到遍历全部的 BeanDefinitionRegistryPostProcessor的目的
 			while (reiterate) {
 				reiterate = false;
+				//获取所有的BeanDefinitionRegistryPostProcessor接口的实现类
 				postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
+				//遍历这些BeanDefinitionRegistryPostProcessor类
 				for (String ppName : postProcessorNames) {
+					//如果它不存在与这个集合里面，证明没有被上面处理过，就不会被跳过，这里主要是解决重复执行的情况
 					if (!processedBeans.contains(ppName)) {
+						//添加到对应的当前处理器集合里面
 						currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
+						//添加到已处理集合里面
 						processedBeans.add(ppName);
+						//将扫描标识为true 准备下次执行
 						reiterate = true;
 					}
 				}
+				//排序
 				sortPostProcessors(currentRegistryProcessors, beanFactory);
+				//注册到注册集合里面，便于后修直接回调父类
 				registryProcessors.addAll(currentRegistryProcessors);
+				//开始执行这些方法
 				invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+				//清空本次执行的处理集合
 				currentRegistryProcessors.clear();
 			}
 
 			// 现在，调用到目前为止已处理的所有处理器的postProcessBeanFactory回调。
+			//BeanDefinitionRegistryPostProcessor 是 BeanFactoryPostProcessor
+			//目的就是为了避免重复获取
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
 			//常规的 普通的工厂后置处理器
+			//程序员手动提供给Spring的BeanFactory  beanFactory.addBeanFactoryPostProcessor(new MyBeanFactoryPostProcessor())
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
-		}
-
-		else {
+		} else {
 			// 调用在上下文实例中注册的工厂处理器。
 			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
 		}
@@ -156,41 +185,47 @@ final class PostProcessorRegistrationDelegate {
 		//这里是真正获取容器内部所有的beanFactory的后置处理器
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 
-		// 在实现PriorityOrdered的BeanFactoryPostProcessor之间分开，
-		// 订购，其余。
 		List<BeanFactoryPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
 		List<String> orderedPostProcessorNames = new ArrayList<>();
 		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
 		for (String ppName : postProcessorNames) {
+			//上面是否已经被执行过了，执行过的直接跳过
 			if (processedBeans.contains(ppName)) {
 				// skip - already processed in first phase above
 			}
+			//添加 实现了PriorityOrdered的BeanFactoryPostProcessors
 			else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
 			}
+			//添加 实现了Ordered的BeanFactoryPostProcessors
 			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
 				orderedPostProcessorNames.add(ppName);
 			}
 			else {
+				//添加剩余的
 				nonOrderedPostProcessorNames.add(ppName);
 			}
 		}
 
 		// 首先，调用实现PriorityOrdered的BeanFactoryPostProcessors。
 		sortPostProcessors(priorityOrderedPostProcessors, beanFactory);
+		//首先回调实现了PriorityOrdered的BeanFactoryPostProcessors
 		invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors, beanFactory);
 
 		// 接下来，调用实现Ordered的BeanFactoryPostProcessors。
 		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<>();
 		for (String postProcessorName : orderedPostProcessorNames) {
+			//getBean可以进行提前实例化进入生命周期
 			orderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		sortPostProcessors(orderedPostProcessors, beanFactory);
+		// 接下来，调用实现Ordered的BeanFactoryPostProcessors。
 		invokeBeanFactoryPostProcessors(orderedPostProcessors, beanFactory);
 
 		//最后，调用所有其他BeanFactoryPostProcessors。
 		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<>();
 		for (String postProcessorName : nonOrderedPostProcessorNames) {
+			//getBean可以进行提前实例化进入生命周期
 			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		//这里执行的自定义的bean工厂的后置处理器
