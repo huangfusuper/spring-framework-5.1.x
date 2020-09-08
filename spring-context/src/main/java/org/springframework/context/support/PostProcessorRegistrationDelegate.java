@@ -52,23 +52,29 @@ final class PostProcessorRegistrationDelegate {
 	}
 
 	/**
-	 * 调用Bean Factory后处理器
-	 * @param beanFactory
-	 * @param beanFactoryPostProcessors
+	 * 扫描项目
+	 * 调用BeanDefinitionRegistryPostProcessor 将对应的类转成BeanDefinition
+	 * 调用 BeanFactoryPostProcessors的回调方法
+	 * @param beanFactory bean工厂
+	 * @param beanFactoryPostProcessors 手动提供的后置处理器
 	 */
-	public static void invokeBeanFactoryPostProcessors(
-			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
+	public static void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
 		// 如果有的话，首先调用BeanDefinitionRegistryPostProcessors。
 		Set<String> processedBeans = new HashSet<>();
 		//默认使用的是DefaultListableBeanFactory工厂对象 所以i这个判断一定会进入进来
 		if (beanFactory instanceof BeanDefinitionRegistry) {
+			//事实上就是Bean工厂
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			//存放程序员自己手动提供给Spring的后置处理器
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
+			//存放执行该过程中寻找到的 BeanDefinitionRegistryPostProcessor
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
-			//TODO  日后探讨 我也不知道
-			//循环遍历bean工厂后处理器 但是这个的debug的对象确实为Null不知道为什么  事实上它并不会进入到这里  作者设置这个  作用不知道
+			//循环遍历bean工厂后处理器 但是这个的debug的对象确实为Null不知道为什么  事实上它并不会进入到这里
+			//这个是扫描用户自己手动添加的一些BeanFactoryPostProcessors
+			//事实上 我们很少会对这里进行更改，只有在对接或者开发第三方组件的时候可能会手动的设置一个后置处理器
+			//正常情况下极少能够使用到这种情况
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
 				//这个判断就是为了保证spring自己的扫描处理器先执行  因为此时spring还没有完成扫描
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
@@ -93,7 +99,6 @@ final class PostProcessorRegistrationDelegate {
 			//调用了一次BeanDefinitionRegistryPostProcessor子类  PriorityOrdered
 			//获取 BeanDefinitionRegistryPostProcessor 的子类 事实上 这里只有一个叫做  ConfigurationClassPostProcessor 他实现了 PriorityOrdered接口
 			//BeanFactoryPostProcessor 也就是 ConfigurationClassPostProcessor 会被添加到容器里面
-			//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 			String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
 				//判断当前这个类是不是实现了PriorityOrdered接口
@@ -179,7 +184,7 @@ final class PostProcessorRegistrationDelegate {
 			// 调用在上下文实例中注册的工厂处理器。
 			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
 		}
-//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 		// 不要在这里初始化FactoryBeans：我们需要保留所有常规bean
 		// 未初始化，让Bean工厂后处理器对其应用！
 		//这里是真正获取容器内部所有的beanFactory的后置处理器

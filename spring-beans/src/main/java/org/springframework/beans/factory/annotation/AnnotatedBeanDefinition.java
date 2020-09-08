@@ -34,15 +34,15 @@ import org.springframework.lang.Nullable;
 public interface AnnotatedBeanDefinition extends BeanDefinition {
 
 	/**
-	 * Obtain the annotation metadata (as well as basic class metadata)
-	 * for this bean definition's bean class.
-	 * @return the annotation metadata object (never {@code null})
+	 * 主要用于获取注解元素据。从接口的命名上我们也能看出，这类主要用于保存通过注解方式定义的bean所对应的BeanDefinition。
+	 * 所以它多提供了一个关于获取注解信息的方法
 	 */
 	AnnotationMetadata getMetadata();
 
 	/**
-	 * Obtain metadata for this bean definition's factory method, if any.
-	 * @return the factory method metadata, or {@code null} if none
+	 * 获取此bean定义的工厂方法的元数据（如果有）。
+	 * 这个方法跟我们的@Bean注解相关。当我们在一个配置类中使用了@Bean注解时，被@Bean注解标记的方法，就被解析成了FactoryMethodMetadata
+	 * @return 工厂方法元数据；如果没有，则为{@code null}
 	 * @since 4.1.1
 	 */
 	@Nullable
