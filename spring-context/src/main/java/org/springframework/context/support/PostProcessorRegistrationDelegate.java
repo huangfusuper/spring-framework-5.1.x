@@ -191,8 +191,11 @@ final class PostProcessorRegistrationDelegate {
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 
 		List<BeanFactoryPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
-		List<String> orderedPostProcessorNames = new ArrayList<>();
-		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<>();
+		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<>();
+
+//		List<String> orderedPostProcessorNames = new ArrayList<>();
+//		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
 		for (String ppName : postProcessorNames) {
 			//上面是否已经被执行过了，执行过的直接跳过
 			if (processedBeans.contains(ppName)) {
@@ -204,11 +207,13 @@ final class PostProcessorRegistrationDelegate {
 			}
 			//添加 实现了Ordered的BeanFactoryPostProcessors
 			else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
-				orderedPostProcessorNames.add(ppName);
+				orderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
+				//orderedPostProcessorNames.add(ppName);
 			}
 			else {
 				//添加剩余的
-				nonOrderedPostProcessorNames.add(ppName);
+				nonOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
+				//nonOrderedPostProcessorNames.add(ppName);
 			}
 		}
 
@@ -218,21 +223,21 @@ final class PostProcessorRegistrationDelegate {
 		invokeBeanFactoryPostProcessors(priorityOrderedPostProcessors, beanFactory);
 
 		// 接下来，调用实现Ordered的BeanFactoryPostProcessors。
-		List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<>();
-		for (String postProcessorName : orderedPostProcessorNames) {
+		//List<BeanFactoryPostProcessor> orderedPostProcessors = new ArrayList<>();
+		//for (String postProcessorName : orderedPostProcessorNames) {
 			//getBean可以进行提前实例化进入生命周期
-			orderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
-		}
-		sortPostProcessors(orderedPostProcessors, beanFactory);
+			//orderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
+		//}
+		//sortPostProcessors(orderedPostProcessors, beanFactory);
 		// 接下来，调用实现Ordered的BeanFactoryPostProcessors。
 		invokeBeanFactoryPostProcessors(orderedPostProcessors, beanFactory);
 
 		//最后，调用所有其他BeanFactoryPostProcessors。
-		List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<>();
-		for (String postProcessorName : nonOrderedPostProcessorNames) {
+		//List<BeanFactoryPostProcessor> nonOrderedPostProcessors = new ArrayList<>();
+		//for (String postProcessorName : nonOrderedPostProcessorNames) {
 			//getBean可以进行提前实例化进入生命周期
-			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
-		}
+			//nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
+		//}
 		//这里执行的自定义的bean工厂的后置处理器
 		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
 
