@@ -318,8 +318,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
-
+		//将找到的配置类的bd 放置到一个集合里面
+		//即将要解析的Bd
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
+		//已经解析完的bd
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
 			//解析配置类 这一步就会解析出来对应扫描的bean的bd 这一步事实上就在解析
@@ -327,7 +329,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			parser.parse(candidates);
 			//校验解析的类
 			parser.validate();
-
+			//获取内部通过Import或者其他方式注入的对象集合
 			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());
 			configClasses.removeAll(alreadyParsed);
 
@@ -337,7 +339,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
-			//加载bean定义
+			//加载bean定义 尝试加载  @ImportResource的配置文件和@Import（xxx.class）来解析配置类并将其转化为bd
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 

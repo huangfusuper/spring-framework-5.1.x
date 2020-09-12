@@ -163,13 +163,16 @@ class ConfigurationClassParser {
 	 * @param configCandidates
 	 */
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
+		//遍历准备好的没有解析的配置bd
 		for (BeanDefinitionHolder holder : configCandidates) {
+			//从bd的包装逻辑中获取对应的BeanDefinition
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
-				//注解类型的类 @Comment
+				//注解类型的类 @Comment 一切注解相关的bd
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				}
+				//通用的BeanDefinition
 				else if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
 					parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
 				}
@@ -192,6 +195,7 @@ class ConfigurationClassParser {
 	protected final void parse(@Nullable String className, String beanName) throws IOException {
 		Assert.notNull(className, "No bean class name for configuration class bean definition");
 		MetadataReader reader = this.metadataReaderFactory.getMetadataReader(className);
+		//递归回调解析的类  直到解析完毕为止
 		processConfigurationClass(new ConfigurationClass(reader, beanName));
 	}
 
@@ -199,9 +203,11 @@ class ConfigurationClassParser {
 		processConfigurationClass(new ConfigurationClass(clazz, beanName));
 	}
 
+	//开始解析注解相关的bd
 	protected final void parse(AnnotationMetadata metadata, String beanName) throws IOException {
+		//传入注解的元数据以及beanName
 		processConfigurationClass(new ConfigurationClass(metadata, beanName));
-	}
+ 	}
 
 	/**
 	 * Validate each {@link ConfigurationClass} object.
@@ -218,7 +224,13 @@ class ConfigurationClassParser {
 	}
 
 
+	/**
+	 * 解析对应的配置类
+	 * @param configClass 配置类的注解原信息
+	 * @throws IOException 异常信息
+	 */
 	protected void processConfigurationClass(ConfigurationClass configClass) throws IOException {
+		//查看是否需要跳过
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
 		}
@@ -245,7 +257,7 @@ class ConfigurationClassParser {
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass);
 		}
 		while (sourceClass != null);
-
+		//层层递归解析之后  解析了所有的类
 		this.configurationClasses.put(configClass, configClass);
 	}
 
@@ -287,8 +299,8 @@ class ConfigurationClassParser {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// 使用@ComponentScan注释配置类->立即执行扫描 同时也会将扫描到的bean组件放入 beanDefinitionMap（内部专门存放 beanName -> bean的详细定义的映射）
 				//至此 spring所配置的要扫描的路径下的bean会被注册进来，注意只是被注册，但是此时并未创建对象
-				Set<BeanDefinitionHolder> scannedBeanDefinitions =
-						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+				//这里使用扫描器将对应的对象扫描及bdmap 注意只是将配置下的是扫描到的  通过scanner
+				Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// 检查扫描的定义集是否有其他配置类，并在需要时递归解析
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
@@ -296,6 +308,7 @@ class ConfigurationClassParser {
 						bdCand = holder.getBeanDefinition();
 					}
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
+						//这里做解析扫描到的类  万一里面有配置类呢！
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
 				}
@@ -337,12 +350,12 @@ class ConfigurationClassParser {
 			}
 		}
 
-		// No superclass -> processing is complete
+		// 没有超类->处理完成
 		return null;
 	}
 
 	/**
-	 * Register member (nested) classes that happen to be configuration classes themselves.
+	 * 注册碰巧是配置类本身的成员（嵌套）类。
 	 */
 	private void processMemberClasses(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
 		Collection<SourceClass> memberClasses = sourceClass.getMemberClasses();
@@ -574,6 +587,7 @@ class ConfigurationClassParser {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							//ImportSelector接口会被回调 selectImports方法 返回的数组 会进行解析
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
