@@ -203,6 +203,7 @@ final class PostProcessorRegistrationDelegate {
 			}
 			//添加 实现了PriorityOrdered的BeanFactoryPostProcessors
 			else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+
 				priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
 			}
 			//添加 实现了Ordered的BeanFactoryPostProcessors
