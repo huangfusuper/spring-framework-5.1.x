@@ -1925,9 +1925,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
-	 * Applies the {@code postProcessAfterInitialization} callback of all
-	 * registered BeanPostProcessors, giving them a chance to post-process the
-	 * object obtained from FactoryBeans (for example, to auto-proxy them).
+	 * 应用所有的{@code postProcessAfterInitialization}回调
+	 * 注册的BeanPostProcessor，使他们有机会对 从FactoryBeans获得的对象（例如，自动代理它们）。
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
 	@Override

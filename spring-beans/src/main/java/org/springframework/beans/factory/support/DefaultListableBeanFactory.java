@@ -1123,8 +1123,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 
+		//当该bean只存在一个beanName的时候
 		if (candidateNames.length == 1) {
+			//获取当前bean的名称
 			String beanName = candidateNames[0];
+			//getBean 是获取一个bean的主要逻辑
 			return new NamedBeanHolder<>(beanName, (T) getBean(beanName, requiredType.toClass(), args));
 		}
 		else if (candidateNames.length > 1) {

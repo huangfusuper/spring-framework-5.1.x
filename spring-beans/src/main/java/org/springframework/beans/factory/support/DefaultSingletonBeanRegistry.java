@@ -350,7 +350,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
-	 *创建单例之前的回调。
+	 * 创建单例之前的回调。
 	 * <p>默认实现将单例注册为当前正在创建中。
 	 * @param beanName 要创建的单例的名称
 	 * @see #isSingletonCurrentlyInCreation 是不是正再创建中的方法
