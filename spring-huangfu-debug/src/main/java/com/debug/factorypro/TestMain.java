@@ -2,6 +2,7 @@ package com.debug.factorypro;
 
 import com.debug.factorypro.beans.UserService;
 import com.debug.factorypro.conf.AppConf;
+import com.debug.factorypro.dao.UserDao;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
@@ -14,7 +15,7 @@ public class TestMain {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(AppConf.class);
 
-		UserService bean = ac.getBean(UserService.class);
-		UserService bean1 = ac.getBean(UserService.class);
+		UserDao bean = ac.getBean(UserDao.class);
+		bean.print();
 	}
 }
