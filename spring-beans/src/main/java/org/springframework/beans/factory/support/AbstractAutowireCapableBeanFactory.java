@@ -592,6 +592,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			//后续需要注入的时候，只需要通过工厂方法返回数据就可以了，在工厂里面可以做代理相关的操作，执行完代理操作后，在返回对象
 			//符合了Spring设计时，为了保证代理对象的包装再Springbean生命周期的后几步来实现的预期
 			//这一步还会删除二级缓存的数据
+			//放到三级缓存的时机是  创建对象之后  填充属性之前
 			addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
 		}
 
@@ -956,6 +957,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				//Aop的相关实现接口  SmartInstantiationAwareBeanPostProcessor
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
 					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
