@@ -9,6 +9,5 @@ public class TestMail {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(ConfApp.class);
 		UserServiceImpl bean = ac.getBean(UserServiceImpl.class);
-		System.out.println(bean);
 	}
 }
