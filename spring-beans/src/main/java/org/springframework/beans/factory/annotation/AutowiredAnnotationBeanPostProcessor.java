@@ -242,7 +242,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
 			throws BeanCreationException {
 
-		// Let's check for lookup methods here..
+		//让我们在这里检查查找方法。
 		if (!this.lookupMethodsChecked.contains(beanName)) {
 			try {
 				ReflectionUtils.doWithMethods(beanClass, method -> {
@@ -267,10 +267,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			this.lookupMethodsChecked.add(beanName);
 		}
 
-		// Quick check on the concurrent map first, with minimal locking.
+		// 首先以最小的锁定快速检查并发映射。
 		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 		if (candidateConstructors == null) {
-			// Fully synchronized resolution now...
+			// 现在完全同步的分辨率...
 			synchronized (this.candidateConstructorsCache) {
 				candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 				if (candidateConstructors == null) {

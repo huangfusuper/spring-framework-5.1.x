@@ -10,16 +10,10 @@ import org.springframework.stereotype.Service;
  * @date 2020年9月23日09:06:14
  */
 @Service
-@Scope("prototype")
 public class EmailServiceImpl {
-	@Autowired
-	private UserServiceImpl userService;
 
-	public UserServiceImpl getUserService() {
-		return userService;
-	}
 
-	public void setUserService(UserServiceImpl userService) {
-		this.userService = userService;
+	public void send(){
+		System.out.println("--------------");
 	}
 }

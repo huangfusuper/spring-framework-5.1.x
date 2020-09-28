@@ -219,7 +219,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/**
 	 * 返回以给定名称注册的（原始）单例对象，
 	 *如果尚未注册，则创建并注册一个新的。
-	 * @param beanName the name of the bean
+	 * @param beanName 豆的名字
 	 * @param singletonFactory the ObjectFactory to lazily create the singleton
 	 * with, if necessary
 	 * @return the registered singleton object
