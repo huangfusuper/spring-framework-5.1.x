@@ -1,5 +1,6 @@
 package com.debug.cycles.conf;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,5 +12,10 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.debug.cycles.service")
 @Configuration
 public class ConfApp {
+
+	@Bean
+	public MyTargetSource myTargetSource(){
+		return new MyTargetSource();
+	}
 
 }

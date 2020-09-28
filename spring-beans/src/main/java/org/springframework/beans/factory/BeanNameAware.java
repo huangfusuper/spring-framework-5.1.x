@@ -36,9 +36,8 @@ package org.springframework.beans.factory;
 public interface BeanNameAware extends Aware {
 
 	/**
-	 * Set the name of the bean in the bean factory that created this bean.
-	 * <p>Invoked after population of normal bean properties but before an
-	 * init callback such as {@link InitializingBean#afterPropertiesSet()}
+	 * 在创建此bean的bean工厂中设置bean的名称。
+	 * <p>在填充正常的bean属性之后但在诸如{@link InitializingBean＃afterPropertiesSet（）}之类的初始化回调之前调用
 	 * or a custom init-method.
 	 * @param name the name of the bean in the factory.
 	 * Note that this name is the actual bean name used in the factory, which may

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
  * @date 2020年9月23日09:06:14
  */
 @Service
+
 public class UserServiceImpl {
 	private EmailServiceImpl emailService;
 
