@@ -532,7 +532,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// 允许在上下文子类中对bean工厂进行后处理。
 				//作用是在BeanFactory准备工作完成后做一些定制化的处理
 				//Spring并没有实现 需要调用者自定义扩展时使用
-				//TODO 如何扩展？  不知道
 				postProcessBeanFactory(beanFactory);
 
 				// 调用在上下文中注册为bean的工厂处理器。

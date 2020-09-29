@@ -12,12 +12,11 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl {
 	private EmailServiceImpl emailService;
 
+
 	@Autowired
-	public UserServiceImpl(EmailServiceImpl emailService) {
+	public void setEmailService(EmailServiceImpl emailService) {
 		this.emailService = emailService;
 	}
-
-
 
 	public void send(){
 		emailService.send();

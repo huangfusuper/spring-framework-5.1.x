@@ -567,7 +567,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		synchronized (mbd.postProcessingLock) {
 			if (!mbd.postProcessed) {
 				try {
-					//合并 bean定义
+					//这里会处理一个对下个里面的 @Value 和 @Au的注入 将值与属性建立映射关系  当然对于  @Au来说 只适用于xml或者手动设置的值   bd.getP.addvalue()
+					//注意这里并不会注入  指建立一个映射关系一个属性或方法与对应注解的属性  并放到缓存里面
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
 				}
 				catch (Throwable ex) {
@@ -1090,8 +1091,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected void applyMergedBeanDefinitionPostProcessors(RootBeanDefinition mbd, Class<?> beanType, String beanName) {
 		for (BeanPostProcessor bp : getBeanPostProcessors()) {
+			//这里会取到所有的后置处理器   寻找 MergedBeanDefinitionPostProcessor
 			if (bp instanceof MergedBeanDefinitionPostProcessor) {
 				MergedBeanDefinitionPostProcessor bdp = (MergedBeanDefinitionPostProcessor) bp;
+				//回调postProcessMergedBeanDefinition方法  这里会处理属性或方法上的各类注解  最为常用的就是@Velue和 @Autowriter
+				//AutowiredAnnotationBeanPostProcessor类的工作就完成了，让我们总结一下这个类的作用，其实这个类就是在实例化某个bean时
+				// 对bean中的属性或者方法进行扫描，扫描的是@Autowired和@Value注解，一旦发现方法或者属性上有这些注解
+				// 就把属性或者方法封装成AutowiredFieldElement或者AutowiredMethodElement对象，这个对象有一个Member
+				// 属性描述对象PropertyDescriptor，属性描述对象可以对属性进行反射读和写操作。最后把这些对象封装成InjectionMetadata对象
+				// 这些对象封装了类Class和集合，集合里面装了AutowiredFieldElement或者AutowiredMethodElement对象。
+				// 这样AutowiredAnnotationBeanPostProcessor类的装配工作就完成了，在后续IOC，依赖注入，
+				// 对bean进行依赖注入时就可以根据InjectionMetadata对象里面封装的内容进行属性赋值了。
 				bdp.postProcessMergedBeanDefinition(mbd, beanType, beanName);
 			}
 		}
@@ -1124,14 +1134,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Apply InstantiationAwareBeanPostProcessors to the specified bean definition
-	 * (by class and name), invoking their {@code postProcessBeforeInstantiation} methods.
-	 * <p>Any returned object will be used as the bean instead of actually instantiating
-	 * the target bean. A {@code null} return value from the post-processor will
-	 * result in the target bean being instantiated.
-	 * @param beanClass the class of the bean to be instantiated
-	 * @param beanName the name of the bean
-	 * @return the bean object to use instead of a default instance of the target bean, or {@code null}
+	 * 将InstantiationAwareBeanPostProcessors应用于指定的bean定义
+	 * （按类和名称），调用其{@code postProcessBeforeInstantiation}方法。
+	 * <p>任何返回的对象都将用作bean，而不是实际实例化
+	 * 目标bean。后处理器的{@code null}返回值将
+	 * 导致目标bean被实例化。
+	 * @param beanClass 要实例化的bean的类
+	 * @param beanName 豆的名字
+	 * @return 要使用的bean对象，而不是目标bean的默认实例，或{@code null}
 	 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
 	 */
 	@Nullable
@@ -1198,6 +1208,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// 自动装配的候选构造函数   第二次调用构造函数
+		//这个是寻找到所有可能会使用到的构造函数
+		//构造方法推断
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
 				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
@@ -1280,9 +1292,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeansException {
 
 		if (beanClass != null && hasInstantiationAwareBeanPostProcessors()) {
+			//获取到所有的 后置处理器
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
+					//扩展点：SmartInstantiationAwareBeanPostProcessor 可以插手Spring获取构造函数的方法
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+					//AutowiredAnnotationBeanPostProcessor 内置
 					Constructor<?>[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
 					if (ctors != null) {
 						return ctors;
@@ -1354,7 +1369,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 */
 	protected BeanWrapper autowireConstructor(
 			String beanName, RootBeanDefinition mbd, @Nullable Constructor<?>[] ctors, @Nullable Object[] explicitArgs) {
-
+		//这里会将构造函数传递进去   寻找最大能匹配的  然后进行创建对象！
 		return new ConstructorResolver(this).autowireConstructor(beanName, mbd, ctors, explicitArgs);
 	}
 

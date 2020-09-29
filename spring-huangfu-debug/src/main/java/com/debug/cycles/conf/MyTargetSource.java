@@ -17,7 +17,7 @@ public class MyTargetSource implements TargetSource {
 
 	@Override
 	public Object getTarget() throws Exception {
-		return new UserServiceImpl();
+		return null;
 	}
 
 	@Override
