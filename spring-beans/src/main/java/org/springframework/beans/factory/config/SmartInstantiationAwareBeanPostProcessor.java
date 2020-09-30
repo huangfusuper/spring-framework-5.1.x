@@ -67,25 +67,21 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	}
 
 	/**
-	 * Obtain a reference for early access to the specified bean,
-	 * typically for the purpose of resolving a circular reference.
-	 * <p>This callback gives post-processors a chance to expose a wrapper
-	 * early - that is, before the target bean instance is fully initialized.
-	 * The exposed object should be equivalent to the what
-	 * {@link #postProcessBeforeInitialization} / {@link #postProcessAfterInitialization}
-	 * would expose otherwise. Note that the object returned by this method will
-	 * be used as bean reference unless the post-processor returns a different
-	 * wrapper from said post-process callbacks. In other words: Those post-process
-	 * callbacks may either eventually expose the same reference or alternatively
-	 * return the raw bean instance from those subsequent callbacks (if the wrapper
-	 * for the affected bean has been built for a call to this method already,
-	 * it will be exposes as final bean reference by default).
-	 * <p>The default implementation returns the given {@code bean} as-is.
-	 * @param bean the raw bean instance
-	 * @param beanName the name of the bean
-	 * @return the object to expose as bean reference
-	 * (typically with the passed-in bean instance as default)
-	 * @throws org.springframework.beans.BeansException in case of errors
+	 * 获取用于早期访问指定bean的参考，
+	 * 通常是为了解决循环参考。
+	 * <p>此回调使后处理器有机会及早公开包装器-即在目标Bean实例完全初始化之前。
+	 * 公开的对象应等效于* {@link #postProcessBeforeInitialization} /{@link #postProcessAfterInitialization}
+	 * 否则将公开的对象。注意，除非后处理器返回与所述后处理回调不同的包装器，
+	 * 否则此方法返回的对象将用作Bean引用。换句话说：这些后处理*回调可能最终会公开相同的引用，或者
+	 * 从这些后续回调返回原始bean实例（如果受影响的bean的包装器
+	 * 已经为调用此方法而构建，
+	 * 默认情况下，它将作为最终bean引用公开）。
+	 * <p>默认实现按原样返回给定的{@code bean}。
+	 * @param bean 原始bean实例
+	 * @param beanName 豆的名字
+	 * @return 公开为bean引用的对象
+	 * (通常将传入的Bean实例作为默认实例)
+	 * @throws org.springframework.beans.BeansException 如果有错误
 	 */
 	default Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		return bean;

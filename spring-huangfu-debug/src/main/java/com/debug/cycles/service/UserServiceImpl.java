@@ -1,6 +1,7 @@
 package com.debug.cycles.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,6 +11,12 @@ import org.springframework.stereotype.Service;
 @Service
 
 public class UserServiceImpl {
+
+	@Value("123")
+	public void print(String value) {
+		System.out.println(value);
+	}
+
 	private EmailServiceImpl emailService;
 
 

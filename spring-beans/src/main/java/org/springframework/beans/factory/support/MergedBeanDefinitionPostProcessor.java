@@ -38,13 +38,14 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 public interface MergedBeanDefinitionPostProcessor extends BeanPostProcessor {
 
 	/**
-	 * Post-process the given merged bean definition for the specified bean.
-	 * @param beanDefinition the merged bean definition for the bean
-	 * @param beanType the actual type of the managed bean instance
-	 * @param beanName the name of the bean
+	 * 对指定bean的给定合并bean定义进行后处理。
+	 * @param beanDefinition bean的合并bean定义
+	 * @param beanType 托管bean实例的实际类型
+	 * @param beanName bean的名字
 	 * @see AbstractAutowireCapableBeanFactory#applyMergedBeanDefinitionPostProcessors
 	 */
-	void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName);
+	void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition,
+										 Class<?> beanType, String beanName);
 
 	/**
 	 * A notification that the bean definition for the specified name has been reset,

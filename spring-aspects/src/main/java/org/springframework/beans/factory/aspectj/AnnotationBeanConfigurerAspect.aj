@@ -55,6 +55,7 @@ public aspect AnnotationBeanConfigurerAspect extends AbstractInterfaceDrivenDepe
 		this.beanConfigurerSupport.setBeanFactory(beanFactory);
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		this.beanConfigurerSupport.afterPropertiesSet();
 	}

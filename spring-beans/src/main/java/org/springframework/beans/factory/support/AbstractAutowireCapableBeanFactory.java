@@ -949,20 +949,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
-	 * Obtain a reference for early access to the specified bean,
-	 * typically for the purpose of resolving a circular reference.
-	 * @param beanName the name of the bean (for error handling purposes)
-	 * @param mbd the merged bean definition for the bean
-	 * @param bean the raw bean instance
-	 * @return the object to expose as bean reference
+	 * 获取有关早期访问指定bean的参考，
+	 * 通常是为了解决循环参考。
+	 * @param beanName Bean的名称（用于错误处理）
+	 * @param mbd bean的合并bean定义
+	 * @param bean 原始bean实例
+	 * @return 公开为bean引用的对象
 	 */
 	protected Object getEarlyBeanReference(String beanName, RootBeanDefinition mbd, Object bean) {
 		Object exposedObject = bean;
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
-				//Aop的相关实现接口  SmartInstantiationAwareBeanPostProcessor
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+					//Aop的相关实现接口  SmartInstantiationAwareBeanPostProcessor
 					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
 				}
 			}
