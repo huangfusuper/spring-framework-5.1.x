@@ -905,13 +905,15 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * 公开DispatcherServlet特定的请求属性并委托给 {@link #doDispatch}
 	 * 用于实际调度。
+	 *
+	 * 实际的入口方法
 	 */
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		logRequest(request);
 
-		// Keep a snapshot of the request attributes in case of an include,
-		// to be able to restore the original attributes after the include.
+		// 如果包含，请保留请求属性的快照，
+		// 以便在包含之后恢复原始属性。
 		Map<String, Object> attributesSnapshot = null;
 		if (WebUtils.isIncludeRequest(request)) {
 			attributesSnapshot = new HashMap<>();

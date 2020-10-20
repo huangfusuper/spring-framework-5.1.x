@@ -868,7 +868,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
-	 * Override the parent class implementation in order to intercept PATCH requests.
+	 * 重写父类实现以拦截PATCH请求。
+	 * 这里是重写的servlet的service方法  所有的请求都会进入到servlet的service方法
+	 * 由他进行统一的封装，Spring重写了这一逻辑，将本应该分发到的doGet或者doPost方法，
+	 * 重写为了 processRequest 方法   这个方法会调用一个抽象方法，这个抽象方法被
+	 * DispatcherServlet所重写，最终完成Spring对于请求的拦截
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -876,6 +880,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
 		if (httpMethod == HttpMethod.PATCH || httpMethod == null) {
+			//这里是主要逻辑 这里调用了抽象方法 doService方法  由子类实现
 			processRequest(request, response);
 		}
 		else {
@@ -980,28 +985,32 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	}
 
 	/**
-	 * Process this request, publishing an event regardless of the outcome.
-	 * <p>The actual event handling is performed by the abstract
-	 * {@link #doService} template method.
+	 * 这里会调用 doService  方法  这个方法由子类实现，也就是DispatcherServlet 实现的，最终完成了代理
+	 *
+	 * 处理此请求，发布事件，无论结果如何。
+	 * <p>实际的事件处理由抽象执行
+	 * {@link #doService} 模板方法。
 	 */
 	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		//记录一个开始时间
 		long startTime = System.currentTimeMillis();
+		//异常信息
 		Throwable failureCause = null;
-
+		//设置语言环境
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
 		LocaleContext localeContext = buildLocaleContext(request);
-
+		//获取和设置当前线程环境中的参数  有就那，没有就不拿
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		ServletRequestAttributes requestAttributes = buildRequestAttributes(request, response, previousAttributes);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
-
+		//初始化上下文环境  这里就是向当前的线程环境里面设置语言环境和属性值
 		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
+			//开始调用抽象方法  有dis实现
 			doService(request, response);
 		}
 		catch (ServletException | IOException ex) {
@@ -1162,12 +1171,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
-	 * Subclasses must implement this method to do the work of request handling,
-	 * receiving a centralized callback for GET, POST, PUT and DELETE.
-	 * <p>The contract is essentially the same as that for the commonly overridden
+	 * 子类必须实现此方法才能进行请求处理，接收GET，POST，PUT和DELETE的集中式回调。
+	 * <p>该合同与通常被覆盖的合同基本相同
 	 * {@code doGet} or {@code doPost} methods of HttpServlet.
-	 * <p>This class intercepts calls to ensure that exception handling and
-	 * event publication takes place.
+	 * <p>此类拦截调用以确保异常处理和事件发布。
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @throws Exception in case of any kind of processing failure
