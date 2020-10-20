@@ -31,4 +31,5 @@ rootProject.children.each {project ->
 }
 include 'spring-source-debug'
 include 'spring-huangfu-debug'
+include 'spring-huangfu-web-debug'
 
