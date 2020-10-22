@@ -112,14 +112,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Look up a handler for the URL path of the given request.
-	 * @param request current HTTP request
-	 * @return the handler instance, or {@code null} if none found
+	 * 查找给定请求的URL路径的处理程序。
+	 * @param request 当前的HTTP请求
+	 * @return 处理程序实例；如果找不到，则为{@code null}
 	 */
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		//获取请求的路径
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		//此时包含一个handler还有默认的拦截器
 		Object handler = lookupHandler(lookupPath, request);
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
@@ -145,12 +147,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Look up a handler instance for the given URL path.
-	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
-	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
-	 * both "/test" and "/team". For details, see the AntPathMatcher class.
-	 * <p>Looks for the most exact pattern, where most exact is defined as
-	 * the longest path pattern.
+	 * 查找给定URL路径的处理程序实例。
+	 * <p>支持直接匹配，例如注册的“ /test”与“ /test”匹配，
+	 * 以及各种Ant样式的模式匹配项，例如注册的“ / t *”匹配项
+	 * “ / test”和“ / team”。有关详细信息，请参见AntPathMatcher类。
+	 * <p>寻找最精确的模式，其中最精确的定义为*最长路径模式。
 	 * @param urlPath the URL the bean is mapped to
 	 * @param request current HTTP request (to expose the path within the mapping to)
 	 * @return the associated handler instance, or {@code null} if not found
@@ -159,15 +160,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 */
 	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
-		// Direct match?
+		// 直接匹配？
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
-			// Bean name or resolved handler?
+			// Bean名称或解析的处理程序？
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
+			//扩展点之一
 			validateHandler(handler, request);
+			//构建路径暴露处理程序
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
 
@@ -244,11 +247,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	}
 
 	/**
-	 * Build a handler object for the given raw handler, exposing the actual
-	 * handler, the {@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}, as well as
-	 * the {@link #URI_TEMPLATE_VARIABLES_ATTRIBUTE} before executing the handler.
-	 * <p>The default implementation builds a {@link HandlerExecutionChain}
-	 * with a special interceptor that exposes the path attribute and uri template variables
+	 * 为给定的原始处理程序构建一个处理程序对象，公开实际的
+	 * 处理程序，{@link #PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE}以及
+	 * 那个 {@link #URI_TEMPLATE_VARIABLES_ATTRIBUTE} 在执行处理程序之前。
+	 * <p>默认实现会生成一个 {@link HandlerExecutionChain}
+	 * 带有特殊的拦截器，该拦截器公开了path属性和uri模板变量
 	 * @param rawHandler the raw handler to expose
 	 * @param pathWithinMapping the path to expose before executing the handler
 	 * @param uriTemplateVariables the URI template variables, can be {@code null} if no variables found
@@ -258,6 +261,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
+		//添加一个默认的拦截器
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
 			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));

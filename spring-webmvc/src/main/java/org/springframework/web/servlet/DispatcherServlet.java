@@ -926,7 +926,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		// Make framework objects available to handlers and view objects.
+		// 使框架对象可用于处理程序并查看对象。
+		//设置各种预设属性
 		request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
 		request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
@@ -942,6 +943,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		try {
+			//开始进行中很正的请求处理
 			doDispatch(request, response);
 		}
 		finally {
@@ -989,32 +991,34 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Process the actual dispatching to the handler.
-	 * <p>The handler will be obtained by applying the servlet's HandlerMappings in order.
-	 * The HandlerAdapter will be obtained by querying the servlet's installed HandlerAdapters
-	 * to find the first that supports the handler class.
-	 * <p>All HTTP methods are handled by this method. It's up to HandlerAdapters or handlers
-	 * themselves to decide which methods are acceptable.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @throws Exception in case of any kind of processing failure
+	 * 处理向处理程序的实际分派。
+	 * <p>通过按顺序应用Servlet的HandlerMappings可以获得处理程序。
+	 * HandlerAdapter将通过查询Servlet的已安装HandlerAdapters获得。
+	 * 查找第一个支持处理程序类的对象。
+	 * <p>所有HTTP方法都由该方法处理。由HandlerAdapters或处理程序决定
+	 * 自己来决定哪种方法可以接受。
+	 * @param request 当前的HTTP请求
+	 * @param response 当前的HTTP响应
+	 * @throws Exception 任何形式的处理失败
 	 */
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		boolean multipartRequestParsed = false;
-
+		//获取异步管理器
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
 		try {
+			//视图
 			ModelAndView mv = null;
+			//异常
 			Exception dispatchException = null;
 
 			try {
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
 
-				// Determine handler for the current request.
+				// 确定当前请求的处理程序。 获取对应的处理器 即@Controller或者其他类型的处理器
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
@@ -1157,10 +1161,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Convert the request into a multipart request, and make multipart resolver available.
-	 * <p>If no multipart resolver is set, simply use the existing request.
-	 * @param request current HTTP request
-	 * @return the processed request (multipart wrapper if necessary)
+	 * 将请求转换为多部分请求，并使多部分解析器可用。
+	 * <p>如果未设置多部分解析器，则只需使用现有请求。
+	 * @param request 当前的HTTP请求
+	 * @return 处理的请求（如果需要，可以使用多部分包装器）
 	 * @see MultipartResolver#resolveMultipart
 	 */
 	protected HttpServletRequest checkMultipart(HttpServletRequest request) throws MultipartException {
@@ -1223,10 +1227,10 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Return the HandlerExecutionChain for this request.
-	 * <p>Tries all handler mappings in order.
-	 * @param request current HTTP request
-	 * @return the HandlerExecutionChain, or {@code null} if no handler could be found
+	 * 返回此请求的HandlerExecutionChain。
+	 * <p>按顺序尝试所有处理程序映射。
+	 * @param request 当前的HTTP请求
+	 * @return HandlerExecutionChain，如果找不到处理程序，则为{@code null}
 	 */
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {

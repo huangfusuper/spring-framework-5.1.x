@@ -18,6 +18,58 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
+
+
+	<!-- #######################################################第一种基于路径匹配规则添加拦截器############################################################# -->
+<!--	<bean class="web.mvc.interceptor.MyInterceptor" id="myInterceptor"/>-->
+
+<!--	<bean id="mappedInterceptor" class="org.springframework.web.servlet.handler.MappedInterceptor">-->
+
+<!--		<constructor-arg index="0" type="java.lang.String[]">-->
+<!--			<list>-->
+<!--				<value>/controller</value>-->
+<!--			</list>-->
+<!--		</constructor-arg>-->
+<!--		<constructor-arg index="1" type="org.springframework.web.servlet.HandlerInterceptor" ref="myInterceptor"/>-->
+<!--	</bean>-->
+
+<!--	<bean id="mappedInterceptor2" class="org.springframework.web.servlet.handler.MappedInterceptor">-->
+
+<!--		<constructor-arg index="0" type="java.lang.String[]">-->
+<!--			<list>-->
+<!--				<value>/c*</value>-->
+<!--			</list>-->
+<!--		</constructor-arg>-->
+<!--		<constructor-arg index="1" type="org.springframework.web.servlet.HandlerInterceptor" ref="myInterceptor"/>-->
+<!--	</bean>-->
+	<!-- #######################################################第一种基于路径匹配规则添加拦截器############################################################# -->
+
+
+	<!-- #######################################################第二种基于路径匹配规则添加拦截器############################################################# -->
+	<!--<bean class="web.mvc.interceptor.MyInterceptor" id="myInterceptor"/>-->
+<!--	<mvc:interceptors>-->
+<!--		<mvc:interceptor>-->
+<!--			<mvc:mapping path="/controller"/>-->
+<!--			<ref bean="myInterceptor"/>-->
+<!--		</mvc:interceptor>-->
+<!--	</mvc:interceptors>-->
+	<!-- #######################################################第二种基于路径匹配规则添加拦截器############################################################# -->
+
+	<!-- #######################################################第三种基于控制器添加拦截器############################################################# -->
+<!--	<bean class="web.mvc.interceptor.MyInterceptor" id="myInterceptor"/>-->
+<!--	<bean class="web.mvc.handler.MyHttpRequestHandler" id="myHttpRequestHandler"/>-->
+<!--	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping" id="handlerMapping">-->
+<!--		<property name="mappings">-->
+<!--			<props>-->
+<!--				<prop key="/handlerMapping">myHttpRequestHandler</prop>-->
+<!--			</props>-->
+<!--		</property>-->
+<!--		<property name="interceptors">-->
+<!--			<ref bean="myInterceptor"/>-->
+<!--		</property>-->
+<!--	</bean>-->
+	<!-- #######################################################第三种基于控制器添加拦截器############################################################# -->
+	
 	<!--配置异常解析器-->
     <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <property name="defaultErrorView" value="error"/>
