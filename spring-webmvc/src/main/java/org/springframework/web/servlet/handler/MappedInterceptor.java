@@ -66,7 +66,7 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	}
 
 	/**
-	 * Create a new MappedInterceptor instance.
+	 * 创建一个新的MappedInterceptor实例.
 	 * @param includePatterns the path patterns to map (empty for matching to all paths)
 	 * @param excludePatterns the path patterns to exclude (empty for no specific excludes)
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns

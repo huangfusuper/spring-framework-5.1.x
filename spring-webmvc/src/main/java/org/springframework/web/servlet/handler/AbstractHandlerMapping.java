@@ -475,6 +475,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+		//adaptedInterceptors  拦截器是添加进来的
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			//路径相关的处理器  当路径匹配的时候才会添加这个拦截器
 			if (interceptor instanceof MappedInterceptor) {

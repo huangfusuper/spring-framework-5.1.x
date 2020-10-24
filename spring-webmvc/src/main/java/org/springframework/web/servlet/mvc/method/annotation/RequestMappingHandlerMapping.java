@@ -16,16 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.lang.Nullable;
@@ -46,6 +36,12 @@ import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Creates {@link RequestMappingInfo} instances from type and method-level
@@ -115,6 +111,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * {@code Predicate}. The prefix for the first matching predicate is used.
 	 * <p>Consider using {@link org.springframework.web.method.HandlerTypePredicate
 	 * HandlerTypePredicate} to group controllers.
+	 *
 	 * @param prefixes a map with path prefixes as key
 	 * @since 5.1
 	 */
@@ -124,6 +121,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * The configured path prefixes as a read-only, possibly empty map.
+	 *
 	 * @since 5.1
 	 */
 	public Map<String, Predicate<Class<?>>> getPathPrefixes() {
@@ -207,8 +205,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Uses method and type-level @{@link RequestMapping} annotations to create
-	 * the RequestMappingInfo.
+	 * 使用方法和类型级别 @{@link RequestMapping} 创建注释
+	 * RequestMappingInfo。
+	 *
 	 * @return the created RequestMappingInfo, or {@code null} if the method
 	 * does not have a {@code @RequestMapping} annotation.
 	 * @see #getCustomMethodCondition(Method)
@@ -217,10 +216,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		//获取  RequestMappingInfo  这个是方法的定义  @Request里面的属性定义   包括路径的  方法的  参数的  请求头的   自定义值的
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
+			//获取  RequestMappingInfo  这个是类的定义  @Request里面的属性定义   包括路径的  方法的  参数的  请求头的   自定义值的
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
+				//合并类与方法的 属性集
 				info = typeInfo.combine(info);
 			}
 			String prefix = getPathPrefix(handlerType);
@@ -249,6 +251,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
 	 * supplying the appropriate custom {@link RequestCondition} depending on whether
 	 * the supplied {@code annotatedElement} is a class or method.
+	 *
 	 * @see #getCustomTypeCondition(Class)
 	 * @see #getCustomMethodCondition(Method)
 	 */
@@ -268,6 +271,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * <p>Consider extending {@link AbstractRequestCondition} for custom
 	 * condition types and using {@link CompositeRequestCondition} to provide
 	 * multiple custom conditions.
+	 *
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
@@ -284,6 +288,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * <p>Consider extending {@link AbstractRequestCondition} for custom
 	 * condition types and using {@link CompositeRequestCondition} to provide
 	 * multiple custom conditions.
+	 *
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
@@ -293,10 +298,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Create a {@link RequestMappingInfo} from the supplied
-	 * {@link RequestMapping @RequestMapping} annotation, which is either
-	 * a directly declared annotation, a meta-annotation, or the synthesized
-	 * result of merging annotation attributes within an annotation hierarchy.
+	 * 根据提供的内容创建一个{@link RequestMappingInfo}
+	 * {@link RequestMapping @RequestMapping} 注释，可以是
+	 * 直接声明的注释，元注释或合成的
+	 * 在注释层次结构中合并注释属性的结果。
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
 			RequestMapping requestMapping, @Nullable RequestCondition<?> customCondition) {
@@ -317,13 +322,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Resolve placeholder values in the given array of patterns.
+	 *
 	 * @return a new array with updated patterns
 	 */
 	protected String[] resolveEmbeddedValuesInPatterns(String[] patterns) {
 		if (this.embeddedValueResolver == null) {
 			return patterns;
-		}
-		else {
+		} else {
 			String[] resolvedPatterns = new String[patterns.length];
 			for (int i = 0; i < patterns.length; i++) {
 				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
@@ -387,11 +392,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		String allowCredentials = resolveCorsAnnotationValue(annotation.allowCredentials());
 		if ("true".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(true);
-		}
-		else if ("false".equalsIgnoreCase(allowCredentials)) {
+		} else if ("false".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(false);
-		}
-		else if (!allowCredentials.isEmpty()) {
+		} else if (!allowCredentials.isEmpty()) {
 			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", " +
 					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
@@ -405,8 +408,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		if (this.embeddedValueResolver != null) {
 			String resolved = this.embeddedValueResolver.resolveStringValue(value);
 			return (resolved != null ? resolved : "");
-		}
-		else {
+		} else {
 			return value;
 		}
 	}
