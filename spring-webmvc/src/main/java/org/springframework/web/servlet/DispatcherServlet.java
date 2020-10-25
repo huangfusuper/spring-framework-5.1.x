@@ -322,7 +322,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	private ThemeResolver themeResolver;
 
-	/** List of HandlerMappings used by this servlet. */
+	/** 此servlet使用的HandlerMappings列表。 */
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
 
@@ -599,7 +599,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Map<String, HandlerMapping> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<>(matchingBeans.values());
-				// We keep HandlerMappings in sorted order.
+				// 我们使HandlerMappings保持排序。
 				AnnotationAwareOrderComparator.sort(this.handlerMappings);
 			}
 		}

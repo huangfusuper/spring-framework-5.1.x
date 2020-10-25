@@ -90,6 +90,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
+		//解析这个请求 最终封装为一个 RequestMappingInfo
 		return info.getMatchingCondition(request);
 	}
 

@@ -207,11 +207,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Checks if all conditions in this request mapping info match the provided request and returns
-	 * a potentially new request mapping info with conditions tailored to the current request.
-	 * <p>For example the returned instance may contain the subset of URL patterns that match to
-	 * the current request, sorted with best matching patterns on top.
-	 * @return a new instance in case all conditions match; or {@code null} otherwise
+	 * 检查此请求映射信息中的所有条件是否与提供的请求匹配并返回
+	 * 潜在的新请求映射信息，其中包含针对当前请求量身定制的条件。
+	 * <p>例如，返回的实例可能包含与以下内容匹配的URL模式的子集
+	 * 当前请求，并以最佳匹配模式排在最前面。
+	 * @return 如果所有条件都满足，则为新实例；或{@code null}否则
 	 */
 	@Override
 	@Nullable
