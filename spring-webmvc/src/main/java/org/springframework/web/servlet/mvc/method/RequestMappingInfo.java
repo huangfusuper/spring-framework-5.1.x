@@ -37,7 +37,7 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Request mapping information. Encapsulates the following request mapping conditions:
+ * 请求映射信息。封装以下请求映射条件：
  * <ol>
  * <li>{@link PatternsRequestCondition}
  * <li>{@link RequestMethodsRequestCondition}
@@ -56,17 +56,30 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 	@Nullable
 	private final String name;
-
+	/**
+	 * url匹配
+	 */
 	private final PatternsRequestCondition patternsCondition;
-
+	/**
+	 * 方法匹配
+	 */
 	private final RequestMethodsRequestCondition methodsCondition;
-
+	/**
+	 * 参数匹配
+	 */
 	private final ParamsRequestCondition paramsCondition;
 
+	/**
+	 * 请求头匹配
+	 */
 	private final HeadersRequestCondition headersCondition;
-
+	/**
+	 * 发送过来的值匹配
+	 */
 	private final ConsumesRequestCondition consumesCondition;
-
+	/**
+	 * 请求要接收的值匹配
+	 */
 	private final ProducesRequestCondition producesCondition;
 
 	private final RequestConditionHolder customConditionHolder;
