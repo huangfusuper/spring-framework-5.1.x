@@ -556,12 +556,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 
+	/**
+	 * 初始化默认的参数处理器 和结果集处理器
+	 */
 	@Override
 	public void afterPropertiesSet() {
-		// Do this first, it may add ResponseBody advice beans
+		// 首先执行此操作，可能会添加ResponseBody建议bean
 		initControllerAdviceCache();
 
 		if (this.argumentResolvers == null) {
+			//参数解析
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
 		}
@@ -571,6 +575,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		if (this.returnValueHandlers == null) {
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
+			//结果集处理
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
 	}
@@ -638,7 +643,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
-		// Annotation-based argument resolution
+		// 基于注释的参数解析
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver());
