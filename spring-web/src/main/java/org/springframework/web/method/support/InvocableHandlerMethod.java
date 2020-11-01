@@ -109,44 +109,45 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Invoke the method after resolving its argument values in the context of the given request.
-	 * <p>Argument values are commonly resolved through
+	 * 在给定请求的上下文中解析其参数值后，调用该方法。
+	 * <p>参数值通常通过以下方式解析
 	 * {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}.
-	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
-	 * i.e. without argument resolution. Examples of provided argument values include a
-	 * {@link WebDataBinder}, a {@link SessionStatus}, or a thrown exception instance.
-	 * Provided argument values are checked before argument resolvers.
-	 * <p>Delegates to {@link #getMethodArgumentValues} and calls {@link #doInvoke} with the
-	 * resolved arguments.
-	 * @param request the current request
-	 * @param mavContainer the ModelAndViewContainer for this request
-	 * @param providedArgs "given" arguments matched by type, not resolved
-	 * @return the raw value returned by the invoked method
-	 * @throws Exception raised if no suitable argument resolver can be found,
-	 * or if the method raised an exception
+	 * The {@code providedArgs} 参数，但是可以提供直接使用的参数值，
+	 * 即没有参数解析。提供的参数值的示例包括
+	 * {@link WebDataBinder}, a {@link SessionStatus}, 或抛出的异常实例。
+	 * 在参数解析器之前检查提供的参数值。
+	 * <p>代表们 {@link #getMethodArgumentValues} 和电话 {@link #doInvoke}与
+	 * 解决的论点。
+	 * @param request 当前请求
+	 * @param mavContainer 此请求的ModelAndViewContainer
+	 * @param providedArgs 按类型匹配的“给定”参数，未解析
+	 * @return 调用的方法返回的原始值
+	 * @throws Exception 如果找不到合适的参数解析器，则引发
+	 * 或者该方法引发异常
 	 * @see #getMethodArgumentValues
 	 * @see #doInvoke
 	 */
 	@Nullable
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
-
+		//获取方法参数值  获取对应的参数的值
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
+		//开始调用方法  传递参数
 		return doInvoke(args);
 	}
 
 	/**
-	 * Get the method argument values for the current request, checking the provided
-	 * argument values and falling back to the configured argument resolvers.
-	 * <p>The resulting array will be passed into {@link #doInvoke}.
+	 * 获取当前请求的方法参数值，检查提供的
+	 * 参数值并回退到已配置的参数解析器。
+	 * <p>结果数组将传递到{@link #doInvoke}中。
 	 * @since 5.1.2
 	 */
 	protected Object[] getMethodArgumentValues(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
-
+		//获取参数对象
 		MethodParameter[] parameters = getMethodParameters();
 		if (ObjectUtils.isEmpty(parameters)) {
 			return EMPTY_ARGS;
@@ -155,15 +156,18 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
+			//设置参数解析器
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			args[i] = findProvidedArgument(parameter, providedArgs);
 			if (args[i] != null) {
 				continue;
 			}
+			//判断参数处理器能都呗处理
 			if (!this.resolvers.supportsParameter(parameter)) {
 				throw new IllegalStateException(formatArgumentError(parameter, "No suitable resolver"));
 			}
 			try {
+				//参数处理
 				args[i] = this.resolvers.resolveArgument(parameter, mavContainer, request, this.dataBinderFactory);
 			}
 			catch (Exception ex) {
@@ -181,12 +185,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Invoke the handler method with the given argument values.
+	 * 使用给定的参数值调用处理程序方法。
 	 */
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
 		try {
+			//反射回调
 			return getBridgedMethod().invoke(getBean(), args);
 		}
 		catch (IllegalArgumentException ex) {

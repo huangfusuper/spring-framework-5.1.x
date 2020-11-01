@@ -51,11 +51,8 @@ public class WebTest {
 	 * @return 返回handlerMethod
 	 * @throws Exception 异常信息
 	 */
-	private Object getHandler() throws Exception {
+	private Object getHandler(MockHttpServletRequest request) throws Exception {
 		testStartTheProcess();
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/user");
-		request.addParameter("id", "1");
-		request.addParameter("name", "huangfu");
 		HandlerExecutionChain handlerExecutionChain = requestMappingHandlerMapping.getHandler(request);
 		return handlerExecutionChain.getHandler();
 	}
@@ -76,8 +73,8 @@ public class WebTest {
 	 */
 	@Test
 	public void testGetHandlerMethod() throws Exception {
-
-		System.out.println(getHandler());
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/user");
+		System.out.println(getHandler(request));
 	}
 
 	/**
@@ -87,7 +84,8 @@ public class WebTest {
 	 */
 	@Test
 	public void testGetHandlerAdapterSupports() throws Exception {
-		Object handler = getHandler();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/user");
+		Object handler = getHandler(request);
 		System.out.println(requestMappingHandlerAdapter.supports(handler));
 	}
 
@@ -96,11 +94,26 @@ public class WebTest {
 	 * @throws Exception 异常信息
 	 */
 	@Test
-	public void testHandlerInvoker() throws Exception {
-		Object handler = getHandler();
+	public void testHandlerInvokerBySimpleParam() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/user");
+		Object handler = getHandler(request);
 		request.addParameter("id", "1");
 		request.addParameter("name", "huangfu");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView modelAndView = requestMappingHandlerAdapter.handle(request, response, handler);
+		System.out.println(modelAndView);
+	}
+
+	/**
+	 * handler执行器测试
+	 * @throws Exception 异常信息
+	 */
+	@Test
+	public void testHandlerInvokerBySimpleParamGetUser() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/test/getUser");
+		Object handler = getHandler(request);
+
+		request.addParameter("id", "1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		ModelAndView modelAndView = requestMappingHandlerAdapter.handle(request, response, handler);
 		System.out.println(modelAndView);

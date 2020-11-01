@@ -884,6 +884,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			processRequest(request, response);
 		}
 		else {
+			//正常请求调用父类的 service,该类重新看诸如 GET POST等方案，完成了由Spring对Servlet的代理
 			super.service(request, response);
 		}
 	}

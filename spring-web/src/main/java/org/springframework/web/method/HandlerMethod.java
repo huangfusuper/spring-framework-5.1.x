@@ -231,7 +231,7 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Return the method parameters for this handler method.
+	 * 返回此处理程序方法的方法参数。
 	 */
 	public MethodParameter[] getMethodParameters() {
 		return this.parameters;

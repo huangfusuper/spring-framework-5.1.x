@@ -1003,7 +1003,7 @@ class MakeLockable {
 
 	@Before(value="execution(void set*(*)) && this(mixin)", argNames="mixin")
 	public void checkNotLocked( Lockable mixin) {
-		// Can also obtain the mixin (this) this way
+		//也可以这样获得mixin（this）
 		//Lockable mixin = (Lockable) jp.getThis();
 		if (mixin.locked()) {
 			throw new IllegalStateException();

@@ -100,8 +100,8 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 
 	/**
-	 * Whether the given {@linkplain MethodParameter method parameter} is
-	 * supported by any registered {@link HandlerMethodArgumentResolver}.
+	 * 是否给定 {@linkplain MethodParameter method parameter} is
+	 * 由任何注册支持 {@link HandlerMethodArgumentResolver}.
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -136,6 +136,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 		HandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
 		if (result == null) {
 			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
+				//RequestParamMethodArgumentResolver 处理简单参数实现
 				if (resolver.supportsParameter(parameter)) {
 					result = resolver;
 					this.argumentResolverCache.put(parameter, result);

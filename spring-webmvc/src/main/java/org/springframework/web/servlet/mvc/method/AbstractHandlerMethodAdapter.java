@@ -77,7 +77,10 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	protected abstract boolean supportsInternal(HandlerMethod handlerMethod);
 
 	/**
-	 * This implementation expects the handler to be an {@link HandlerMethod}.
+	 * 此实现期望处理程序为 {@link HandlerMethod}.
+	 *
+	 * 当程序为{@link org.springframework.stereotype.Controller}  or {@link org.springframework.web.bind.annotation.RequestMapping}
+	 * 时  为{@link HandlerMethod}.
 	 */
 	@Override
 	@Nullable
@@ -88,21 +91,21 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	}
 
 	/**
-	 * Use the given handler method to handle the request.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handlerMethod handler method to use. This object must have previously been passed to the
-	 * {@link #supportsInternal(HandlerMethod)} this interface, which must have returned {@code true}.
-	 * @return a ModelAndView object with the name of the view and the required model data,
-	 * or {@code null} if the request has been handled directly
-	 * @throws Exception in case of errors
+	 * 使用给定的处理程序方法处理请求。
+	 * @param request 当前的HTTP请求
+	 * @param response 当前的HTTP响应
+	 * @param handlerMethod 要使用的处理程序方法。此对象必须先前已传递给
+	 * {@link #supportsInternal(HandlerMethod)} 此接口，必须已返回 {@code true}.
+	 * @return 具有视图名称和所需模型数据的ModelAndView对象，
+	 * 或 {@code null} 如果请求已直接处理
+	 * @throws Exception 如果有错误
 	 */
 	@Nullable
 	protected abstract ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception;
 
 	/**
-	 * This implementation expects the handler to be an {@link HandlerMethod}.
+	 * 此实现期望处理程序为 {@link HandlerMethod}.
 	 */
 	@Override
 	public final long getLastModified(HttpServletRequest request, Object handler) {

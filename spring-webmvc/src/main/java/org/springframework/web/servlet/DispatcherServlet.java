@@ -1025,24 +1025,29 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				// Determine handler adapter for the current request.
+				// 确定当前请求的处理程序适配器。 假设时Controller  那么handler时HandlerMethod
 				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
 
-				// Process last-modified header, if supported by the handler.
+				// 如果处理程序支持，则处理最后修改的标头。
 				String method = request.getMethod();
 				boolean isGet = "GET".equals(method);
 				if (isGet || "HEAD".equals(method)) {
 					long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+					//验证 是否没有修改  如果没有任何修改则会使用浏览器缓存
 					if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
 						return;
 					}
 				}
-
+				//验证前置拦截器的拦截是否生效  当前置拦截返回的为false的时候 则直接结束不进行下次的访问
+				//这里面会调用两个方法
+				//1.调用preHandler方法  当前置拦截器返回false的时候
+					//证明此时方法会直接结束 那么会调用拦截器的后置方法！
 				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
-				// Actually invoke the handler.
+				// 实际调用处理程序。
+				//当过滤器验证通过之后 开始进行处理这个handler
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1235,6 +1240,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
 		if (this.handlerMappings != null) {
+			//RequestMappingHandlerMapping  正常的Controller类会被该处理器扫描到，他在项目启动的时候就吧内放置到到了容器里面
+			//BeanNameUrlHandlerMapping  通过一些接口添加的bean   [注意这类bean的名字必须以 / 开头，而且必须由对应的适配器才能够正常执行]
 			for (HandlerMapping mapping : this.handlerMappings) {
 				HandlerExecutionChain handler = mapping.getHandler(request);
 				if (handler != null) {
@@ -1265,9 +1272,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
-	 * Return the HandlerAdapter for this handler object.
-	 * @param handler the handler object to find an adapter for
-	 * @throws ServletException if no HandlerAdapter can be found for the handler. This is a fatal error.
+	 * 返回此处理程序对象的HandlerAdapter。
+	 * @param handler 处理程序对象以查找适配器
+	 * @throws ServletException 如果找不到处理程序的HandlerAdapter。这是一个致命错误。
 	 */
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
 		if (this.handlerAdapters != null) {

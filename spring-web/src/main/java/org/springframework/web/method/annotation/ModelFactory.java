@@ -90,11 +90,11 @@ public final class ModelFactory {
 
 
 	/**
-	 * Populate the model in the following order:
+	 * 按以下顺序填充模型：
 	 * <ol>
-	 * <li>Retrieve "known" session attributes listed as {@code @SessionAttributes}.
-	 * <li>Invoke {@code @ModelAttribute} methods
-	 * <li>Find {@code @ModelAttribute} method arguments also listed as
+	 * <li>检索列为{@code @SessionAttributes}的“已知”会话属性。
+	 * <li>调用{@code @ModelAttribute}方法
+	 * <li>找到{@code @ModelAttribute}方法参数也列为
 	 * {@code @SessionAttributes} and ensure they're present in the model raising
 	 * an exception if necessary.
 	 * </ol>

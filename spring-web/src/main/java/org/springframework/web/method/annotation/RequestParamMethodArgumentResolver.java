@@ -111,12 +111,12 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 
 
 	/**
-	 * Supports the following:
+	 * 支持以下内容：
 	 * <ul>
-	 * <li>@RequestParam-annotated method arguments.
-	 * This excludes {@link Map} params where the annotation does not specify a name.
-	 * See {@link RequestParamMapMethodArgumentResolver} instead for such params.
-	 * <li>Arguments of type {@link MultipartFile} unless annotated with @{@link RequestPart}.
+	 * <li>@RequestParam-annotated 方法参数。
+	 * 这不包括 {@link Map} 注释未指定名称的参数。
+	 * 看到 {@link RequestParamMapMethodArgumentResolver} 代替这样的参数.
+	 * <li>类型参数 {@link MultipartFile} 除非带有注释 @{@link RequestPart}.
 	 * <li>Arguments of type {@code Part} unless annotated with @{@link RequestPart}.
 	 * <li>In default resolution mode, simple type arguments even if not with @{@link RequestParam}.
 	 * </ul>
@@ -125,6 +125,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(RequestParam.class)) {
 			if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
+				//判断是否加了 RequestParam 注解
 				RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
 				return (requestParam != null && StringUtils.hasText(requestParam.name()));
 			}
@@ -140,8 +141,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
 				return true;
 			}
+			//当没有设置RequestParam注解
 			else if (this.useDefaultResolution) {
-				return BeanUtils.isSimpleProperty(parameter.getNestedParameterType());
+				//判断是是不是基础类型的参数
+				//Enum、CharSequence、Number、Date、URI、URL、Locale、Class类型的参数
+ 				return BeanUtils.isSimpleProperty(parameter.getNestedParameterType());
 			}
 			else {
 				return false;

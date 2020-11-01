@@ -122,7 +122,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			AnnotatedElementUtils.hasAnnotation(method, InitBinder.class);
 
 	/**
-	 * MethodFilter that matches {@link ModelAttribute @ModelAttribute} methods.
+	 * MethodFilter that matches {@link ModelAttribute or ModelAttribute} methods.
 	 */
 	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = method ->
 			(!AnnotatedElementUtils.hasAnnotation(method, RequestMapping.class) &&
@@ -174,7 +174,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	private boolean synchronizeOnSession = false;
 
 	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
-
+	//LocalVariableTableParameterNameDiscoverer
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	@Nullable
@@ -562,6 +562,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	@Override
 	public void afterPropertiesSet() {
 		// 首先执行此操作，可能会添加ResponseBody建议bean
+		//初始化操作  这个操作会扫描项目下的 ControllerAdvice类并解析 建立该类与内部方法 RequestMapping和ModelAttribute的缓存
+		//建立该类与InitBinder注解方法的映射
 		initControllerAdviceCache();
 
 		if (this.argumentResolvers == null) {
@@ -584,7 +586,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (getApplicationContext() == null) {
 			return;
 		}
-
+		//寻找所有的 ControllerAdvice 注解的类
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(adviceBeans);
 
@@ -595,12 +597,16 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (beanType == null) {
 				throw new IllegalStateException("Unresolvable type for ControllerAdviceBean: " + adviceBean);
 			}
+			//寻找加了  ModelAttribute 和 RequestMapping注解的方法
 			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
+				//将这个 ModelAttribute 和 ！RequestMapping注解的方法和ControllerAdvice注解的类绑定
 				this.modelAttributeAdviceCache.put(adviceBean, attrMethods);
 			}
+			//寻找 InitBinder 注解的方法
 			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
+				//将这个 InitBinder注解的方法和ControllerAdvice注解的类绑定
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
 			}
 			if (RequestBodyAdvice.class.isAssignableFrom(beanType) || ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
@@ -609,6 +615,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		if (!requestResponseBodyAdviceBeans.isEmpty()) {
+			//缓存这些 ControllerAdvice类
 			this.requestResponseBodyAdvice.addAll(0, requestResponseBodyAdviceBeans);
 		}
 
@@ -776,14 +783,24 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return true;
 	}
 
+	/**
+	 * handler的处理程序
+	 * @param request 当前的HTTP请求
+	 * @param response 当前的HTTP响应
+	 * @param handlerMethod 要使用的处理程序方法。此对象必须先前已传递给
+	 * {@link #supportsInternal(HandlerMethod)} 此接口，必须已返回 {@code true}.
+	 * @return
+	 * @throws Exception
+	 */
 	@Override
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ModelAndView mav;
+		//检查请求  检查请求方式  是不是为get head post
 		checkRequest(request);
 
-		// Execute invokeHandlerMethod in synchronized block if required.
+		// 如果需要，在同步块中执行 invokeHandlerMethod。
 		if (this.synchronizeOnSession) {
 			HttpSession session = request.getSession(false);
 			if (session != null) {
@@ -798,7 +815,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 		}
 		else {
-			// No synchronization on session demanded at all...
+			// 完全不需要会话同步...
 			mav = invokeHandlerMethod(request, response, handlerMethod);
 		}
 
@@ -826,17 +843,21 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	/**
-	 * Return the {@link SessionAttributesHandler} instance for the given handler type
+	 * 返回 {@link SessionAttributesHandler} 给定处理程序类型的实例
 	 * (never {@code null}).
 	 */
 	private SessionAttributesHandler getSessionAttributesHandler(HandlerMethod handlerMethod) {
+		//获取当前bean 的类型
 		Class<?> handlerType = handlerMethod.getBeanType();
+		//从缓存获取 SessionAttributesHandler
 		SessionAttributesHandler sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
 		if (sessionAttrHandler == null) {
 			synchronized (this.sessionAttributesHandlerCache) {
 				sessionAttrHandler = this.sessionAttributesHandlerCache.get(handlerType);
 				if (sessionAttrHandler == null) {
+					//构建一个 SessionAttributesHandler
 					sessionAttrHandler = new SessionAttributesHandler(handlerType, this.sessionAttributeStore);
+					//放到缓存
 					this.sessionAttributesHandlerCache.put(handlerType, sessionAttrHandler);
 				}
 			}
@@ -845,8 +866,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
-	 * if view resolution is required.
+	 * 调用 {@link RequestMapping} 处理程序方法准备 {@link ModelAndView}
+	 * 如果需要视图分辨率。
 	 * @since 4.2
 	 * @see #createInvocableHandlerMethod(HandlerMethod)
 	 */
@@ -856,19 +877,29 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		try {
+			//返回该类的数据格式绑定器 该方法会返回该bean下所有的数据个数绑定器
 			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+			//获取模型工厂 方法会返回该bean下所有的 ModelAttribute 方法
 			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
-
+			//创建可调用的处理程序方法  包装了 下 handlerMethod
 			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+			/**
+			 * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.afterPropertiesSet
+			 * 的时候呗添加进去的
+			 */
 			if (this.argumentResolvers != null) {
+				//设置参数解析器
 				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 			}
 			if (this.returnValueHandlers != null) {
+				//设置结果集解析器
 				invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 			}
+			//设置数据绑定器工厂
 			invocableMethod.setDataBinderFactory(binderFactory);
+			//设置参数名称解析器  使用 LocalVariableTableParameterNameDiscoverer  asm字节码技术解析参数名称
 			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-
+			//创建模型视图容器 开始进行初始化操作
 			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
@@ -893,7 +924,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				});
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
-
+			//开始调用并处理 invokeAndHandle请求处理
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
@@ -916,16 +947,26 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return new ServletInvocableHandlerMethod(handlerMethod);
 	}
 
+	/**
+	 * 获取模型工场
+	 * @param handlerMethod handlerMethod
+	 * @param binderFactory 数据绑定格式其工厂
+	 * @return 模型工厂
+	 */
 	private ModelFactory getModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
+		//获取  SessionAttributesHandler 会话属性处理程序
 		SessionAttributesHandler sessionAttrHandler = getSessionAttributesHandler(handlerMethod);
+		//获取当前Controller的类型
 		Class<?> handlerType = handlerMethod.getBeanType();
 		Set<Method> methods = this.modelAttributeCache.get(handlerType);
 		if (methods == null) {
+			//查询该类下  ！RequestMapping && ModelAttribute 注解的方法
 			methods = MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS);
+			//防止到缓存
 			this.modelAttributeCache.put(handlerType, methods);
 		}
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<>();
-		// Global methods first
+		// 获取  ModelAttribute 和 !RequestMapping注解的方法从ControllerAdvice类里面
 		this.modelAttributeAdviceCache.forEach((clazz, methodSet) -> {
 			if (clazz.isApplicableToBeanType(handlerType)) {
 				Object bean = clazz.resolveBean();
@@ -934,6 +975,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				}
 			}
 		});
+		//在寻找当前的bean的  ModelAttribute 方法
 		for (Method method : methods) {
 			Object bean = handlerMethod.getBean();
 			attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
@@ -951,27 +993,41 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return attrMethod;
 	}
 
+
+	/**
+	 * 返回一个数据绑定工厂   绑定器工厂里面存放了该类和ControllerActive类里面所有的 数据格式绑定器
+	 * @param handlerMethod handlerMethod
+	 * @return 返回数据绑定工厂
+	 * @throws Exception 异常信息
+	 */
 	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) throws Exception {
+		//获取当前bean的类型
 		Class<?> handlerType = handlerMethod.getBeanType();
 		Set<Method> methods = this.initBinderCache.get(handlerType);
 		if (methods == null) {
+			//扫描该类下所有加了  {@link InitBinder}注解的方法 声明为数据格式的绑定器
 			methods = MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS);
+			//缓存该类的数据格式绑定器
 			this.initBinderCache.put(handlerType, methods);
 		}
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<>();
-		// Global methods first
+		// 全局方法优先  @ControllerAdvice类下的数据格式绑定器优先处理
 		this.initBinderAdviceCache.forEach((clazz, methodSet) -> {
 			if (clazz.isApplicableToBeanType(handlerType)) {
 				Object bean = clazz.resolveBean();
 				for (Method method : methodSet) {
+					//将该方法的数据绑定器格式绑定起来
 					initBinderMethods.add(createInitBinderMethod(bean, method));
 				}
 			}
 		});
+		//当前的Controller类的所有的加了 InitBinder注解的方法
 		for (Method method : methods) {
 			Object bean = handlerMethod.getBean();
+			//添加到绑定器的集合里面
 			initBinderMethods.add(createInitBinderMethod(bean, method));
 		}
+		//创建绑定器工厂
 		return createDataBinderFactory(initBinderMethods);
 	}
 

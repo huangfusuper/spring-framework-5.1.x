@@ -221,7 +221,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			return this.notModified;
 		}
 
-		// Evaluate conditions in order of precedence.
+		// 按优先级评估条件。
 		// See https://tools.ietf.org/html/rfc7232#section-6
 
 		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
@@ -236,7 +236,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			validateIfModifiedSince(lastModifiedTimestamp);
 		}
 
-		// Update response
+		// 更新回应
 		if (response != null) {
 			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
 			if (this.notModified) {

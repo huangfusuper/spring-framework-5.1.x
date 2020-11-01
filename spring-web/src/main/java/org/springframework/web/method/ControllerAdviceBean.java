@@ -146,8 +146,8 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	/**
-	 * Check whether the given bean type should be assisted by this
-	 * {@code @ControllerAdvice} instance.
+	 * 检查给定的bean类型是否应以此为辅助
+	 * {@code @ControllerAdvice} 例子.
 	 * @param beanType the type of the bean to check
 	 * @since 4.0
 	 * @see org.springframework.web.bind.annotation.ControllerAdvice

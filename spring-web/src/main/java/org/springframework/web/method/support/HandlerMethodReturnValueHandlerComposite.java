@@ -68,7 +68,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	}
 
 	/**
-	 * Iterate over registered {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers} and invoke the one that supports it.
+	 * 遍历注册 {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers} 并调用支持它的程序。
 	 * @throws IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
 	 */
 	@Override

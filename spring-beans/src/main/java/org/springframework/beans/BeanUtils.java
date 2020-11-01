@@ -569,11 +569,11 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Check if the given type represents a "simple" value type:
-	 * a primitive, an enum, a String or other CharSequence, a Number, a Date,
-	 * a URI, a URL, a Locale or a Class.
-	 * @param clazz the type to check
-	 * @return whether the given type represents a "simple" value type
+	 * 检查给定类型是否表示“简单”值类型：
+	 * 原语，枚举，字符串或其他CharSequence，数字，日期，
+	 * URI，URL，语言环境或类。
+	 * @param clazz 检查的类型
+	 * @return 给定类型是否表示“简单”值类型
 	 */
 	public static boolean isSimpleValueType(Class<?> clazz) {
 		return (ClassUtils.isPrimitiveOrWrapper(clazz) ||

@@ -368,14 +368,16 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/**
-	 * Check the given request for supported methods and a required session, if any.
-	 * @param request current HTTP request
-	 * @throws ServletException if the request cannot be handled because a check failed
+	 * 检查给定的请求以获取受支持的方法和所需的会话（如果有）。
+	 * @param request 当前的HTTP请求
+	 * @throws ServletException 如果由于检查失败而无法处理该请求
 	 * @since 4.2
 	 */
 	protected final void checkRequest(HttpServletRequest request) throws ServletException {
-		// Check whether we should support the request method.
+		// 检查我们是否应支持请求方法。
+		//获取本次请求的方法
 		String method = request.getMethod();
+		//get head post方式的请求
 		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
 			throw new HttpRequestMethodNotSupportedException(method, this.supportedMethods);
 		}

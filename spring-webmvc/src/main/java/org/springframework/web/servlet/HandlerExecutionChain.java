@@ -123,17 +123,20 @@ public class HandlerExecutionChain {
 
 
 	/**
-	 * Apply preHandle methods of registered interceptors.
-	 * @return {@code true} if the execution chain should proceed with the
-	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
-	 * that this interceptor has already dealt with the response itself.
+	 * 应用注册拦截器的preHandle方法。
+	 * @return {@code true} 执行链是否应该继续执行
+	 * 下一个拦截器或处理程序本身。否则，DispatcherServlet假设
+	 *该拦截器已经处理了响应本身。
 	 */
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		//获取对应的全部拦截器
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = 0; i < interceptors.length; i++) {
 				HandlerInterceptor interceptor = interceptors[i];
+				//查找所有的前置拦截器是否又返回false的  如果有的话则直接结束  调用拦截器的完成回调
 				if (!interceptor.preHandle(request, response, this.handler)) {
+					//当前前置拦截器返回了false的时候  调用这个方法 这个方法是回调所有拦截器的完成时方法 也就是后置拦截器 afterCompletion
 					triggerAfterCompletion(request, response, null);
 					return false;
 				}
@@ -159,9 +162,9 @@ public class HandlerExecutionChain {
 	}
 
 	/**
-	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
-	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
-	 * has successfully completed and returned true.
+	 * 在映射的HandlerInterceptor上触发afterCompletion回调。
+	 * 只会对所有调用preHandle的拦截器调用afterCompletion
+	 * 已成功完成并返回true。
 	 */
 	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
 			throws Exception {

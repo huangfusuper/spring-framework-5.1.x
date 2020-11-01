@@ -403,7 +403,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the type of the method/constructor parameter.
+	 * 返回方法/构造函数参数的类型。
 	 * @return the parameter type (never {@code null})
 	 */
 	public Class<?> getParameterType() {
@@ -453,7 +453,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the nested type of the method/constructor parameter.
+	 * 返回方法/构造函数参数的嵌套类型r.
 	 * @return the parameter type (never {@code null})
 	 * @since 3.1
 	 * @see #getNestingLevel()

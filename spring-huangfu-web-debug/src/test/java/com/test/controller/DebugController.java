@@ -16,4 +16,10 @@ public class DebugController {
 		modelAndView.addObject("user",user);
 		return modelAndView;
 	}
+
+	@RequestMapping("getUser")
+	public String getUser(Integer id){
+		System.out.println(id);
+		return "test GetUser";
+	}
 }
